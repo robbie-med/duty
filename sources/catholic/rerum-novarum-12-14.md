@@ -1,0 +1,23 @@
+---
+title: "Rerum Novarum (On Capital and Labor), §§ 12–14: the family"
+author: Pope Leo XIII
+date_of_work: 1891
+tradition: catholic
+language: en
+source_url: https://www.vatican.va/content/leo-xiii/en/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum.html
+license: "© Libreria Editrice Vaticana; published openly by the Holy See at vatican.va"
+retrieved: 2026-11-22
+---
+# Rerum Novarum, §§ 12–14 (the family)
+
+## 12
+
+12. The rights here spoken of, belonging to each individual man, are seen in much stronger light when considered in relation to man's social and domestic obligations. In choosing a state of life, it is indisputable that all are at full liberty to follow the counsel of Jesus Christ as to observing virginity, or to bind themselves by the marriage tie. No human law can abolish the natural and original right of marriage, nor in any way limit the chief and principal purpose of marriage ordained by God's authority from the beginning: "Increase and multiply." (3) Hence we have the family, the "society" of a man's house - a society very small, one must admit, but none the less a true society, and one older than any State. Consequently, it has rights and duties peculiar to itself which are quite independent of the State.
+
+## 13
+
+13. That right to property, therefore, which has been proved to belong naturally to individual persons, must in like wise belong to a man in his capacity of head of a family; nay, that right is all the stronger in proportion as the human person receives a wider extension in the family group. It is a most sacred law of nature that a father should provide food and all necessaries for those whom he has begotten; and, similarly, it is natural that he should wish that his children, who carry on, so to speak, and continue his personality, should be by him provided with all that is needful to enable them to keep themselves decently from want and misery amid the uncertainties of this mortal life. Now, in no other way can a father effect this except by the ownership of productive property, which he can transmit to his children by inheritance. A family, no less than a State, is, as We have said, a true society, governed by an authority peculiar to itself, that is to say, by the authority of the father. Provided, therefore, the limits which are prescribed by the very purposes for which it exists be not transgressed, the family has at least equal rights with the State in the choice and pursuit of the things needful to its preservation and its just liberty. We say, "at least equal rights"; for, inasmuch as the domestic household is antecedent, as well in idea as in fact, to the gathering of men into a community, the family must necessarily have rights and duties which are prior to those of the community, and founded more immediately in nature. If the citizens, if the families on entering into association and fellowship, were to experience hindrance in a commonwealth instead of help, and were to find their rights attacked instead of being upheld, society would rightly be an object of detestation rather than of desire.
+
+## 14
+
+14. The contention, then, that the civil government should at its option intrude into and exercise intimate control over the family and the household is a great and pernicious error. True, if a family finds itself in exceeding distress, utterly deprived of the counsel of friends, and without any prospect of extricating itself, it is right that extreme necessity be met by public aid, since each family is a part of the commonwealth. In like manner, if within the precincts of the household there occur grave disturbance of mutual rights, public authority should intervene to force each party to yield to the other its proper due; for this is not to deprive citizens of their rights, but justly and properly to safeguard and strengthen them. But the rulers of the commonwealth must go no further; here, nature bids them stop. Paternal authority can be neither abolished nor absorbed by the State; for it has the same source as human life itself. "The child belongs to the father," and is, as it were, the continuation of the father's personality; and speaking strictly, the child takes its place in civil society, not of its own right, but in its quality as member of the family in which it is born. And for the very reason that "the child belongs to the father" it is, as St. Thomas Aquinas says, "before it attains the use of free will, under the power and the charge of its parents." (4) The socialists, therefore, in setting aside the parent and setting up a State supervision, act against natural justice, and destroy the structure of the home.

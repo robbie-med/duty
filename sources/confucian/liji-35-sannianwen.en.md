@@ -1,0 +1,70 @@
+---
+title: Questions About The Mourning For Three Years (San Nian Wen)
+title_original: 禮記·三年問
+author: (compilers of the Liji)
+translator: James Legge (1885)
+tradition: confucian
+language: en
+source_url: https://archive.sacred-texts.com/cfu/liki2/liki235.htm
+license: public domain (Sacred Books of the East vol. 28, 1885)
+retrieved: 2026-11-22
+---
+# Liji 35 · San Nian Wen 三年問 · Questions About The Mourning For Three Years
+
+## San Nian Wen 1
+
+What purposes do the mourning rites for three years serve?
+
+The different rules for the mourning rites were established in harmony with (men's) feelings. By means of them the differences in the social relations are set forth, and the distinctions shown of kindred as nearer or more distant, and of ranks as more noble or less. They do not admit of being diminished or added to; and are therefore called 'The unchanging rules.'
+
+## San Nian Wen 2
+
+The greater a wound is, the longer it remains; and the more. pain it gives, the more slowly is it healed. The mourning of three years, being appointed with its various forms in harmony with the feelings (produced by the occasion of it), was intended to mark the greatest degree of grief. The sackcloth with jagged edges., the dark colour of the sackcloth and the staff, the shed reared against the wall, the gruel, the sleeping on straw, and the clod of earth for a pillow:--these all were intended to set forth the extremity of the grief.
+
+## San Nian Wen 3
+
+The mourning of the three years came really to an end with (the close of) the twenty-fifth month. The sorrow and pain were not yet ended, and the longing loving thoughts were not yet forgotten; but in the termination of the mourning dress in this way, was it not shown that there should be an end to the duties rendered to the dead, and that the time was come for the resumption of their duties to the living?
+
+## San Nian Wen 4
+
+All living creatures between heaven and earth, being endowed with blood and breath, have a certain amount of knowledge. Possessing that amount of knowledge, there is not one of them but knows to love its species. Take the larger birds and beasts:--when one of them has lost its mate, after a month or a season, it is sure to return and go about their old haunts. It turns round and round, utters its cries, now moves, now stops, and looks quite embarrassed and uncertain in its movements, before it can leave the place. Even the smaller birds, such as swallows and sparrows, chatter and cry for a little before they can leave the place. But among all creatures that have blood and breath, there is none which has intelligence equal to man; and hence the feeling of man on the death of his kindred remains unexhausted even till death.
+
+## San Nian Wen 5
+
+Will any one follow the example of those men who are under the influence of their depraved lusts? In that case, when a kinsman dies in the morning, he will forget him by the evening. But if we follow the course of such men, we shall find that they are not equal to the birds and beasts. How can they live with their kindred, and not fall into all disorders?
+
+## San Nian Wen 6
+
+Will he rather follow the example of the superior man who attends to all the methods by which the feeling of grief is set forth? In that case, the twenty-five months, after which the mourning of three years comes to an end, will seem to pass as quickly as a carriage drawn by four horses is whirled past a crevice. And if we continue to indulge the feeling, it will prove to be inexhaustible.
+
+## San Nian Wen 7
+
+Therefore the ancient kings determined the proper medium for mourning, and appointed its definite terms. As soon as it was sufficient for the elegant expression of the varied feeling, it was to be laid aside.
+
+## San Nian Wen 8
+
+This being the case, how is it that (in certain cases the mourning lasts) only for a year? The answer is, that in the case of the nearest kindred, there is a break in it at the end of a year.
+
+## San Nian Wen 9
+
+How is that? The answer is:--The interaction of heaven and earth has run its round; and the four seasons have gone through their changes. All things between heaven and earth begin their processes anew. The rules of mourning are intended to resemble this.
+
+## San Nian Wen 10
+
+Then how is it that there are three years' mourning (for a parent)? The answer is:--From the wish to make it greater and more impressive, the time is doubled, and so embraces two round years.
+
+## San Nian Wen 11
+
+What about the mourning for nine months' and the shorter periods? The answer is:--It is to prevent such mourning from reaching (the longer periods).
+
+## San Nian Wen 12
+
+Therefore the three years should be considered as the highest expression of grief in mourning; the three months, and five months, as the lowest; while the year and the nine months are between them. Heaven above gives an example; earth beneath, a law; and man between, a pattern. The harmony and unity that should characterise men living in their kinships are hereby completely shown.
+
+## San Nian Wen 13
+
+Thus it is that in the mourning of three years the highest forms that vary and adorn the ways of men are displayed. Yes, this is what is called the richest exhibition (of human feelings).
+
+## San Nian Wen 14
+
+In this the hundred kings (of all the dynasties) agree, and ancient and modern customs are one and the same. But whence it came is not known.

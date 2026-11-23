@@ -1,0 +1,30 @@
+[
+ {
+  "file": "kjv-apocrypha.md",
+  "title": "The Apocrypha, King James Version",
+  "author": "Translators of the Authorized Version (1611)",
+  "translator": null,
+  "date_of_work": "1611 (standard Oxford text of 1769)",
+  "tradition": "research",
+  "language": "en",
+  "source_url": "https://ebible.org/Scriptures/eng-kjv_vpl.zip",
+  "license": "public domain (outside the UK; Crown letters patent apply in the UK only)",
+  "chars": 885389,
+  "sections": 5720,
+  "notes": "The 14 books of the Apocrypha as printed in the 1611 KJV (Tobit ... 2 Esdras, Prayer of Manasses), 5,720 verses, same format as kjv.md. Kept separate because WCF I.3 holds them no part of the canon; included because 2 Maccabees 12:43-46 is the Roman proof-text for prayers for the dead (answered by Calvin, Institutes III.5.8). Not canonical for this house (WCF 1.3): reference only, never quoted as Scripture."
+ },
+ {
+  "file": "kjv.md",
+  "title": "The Holy Bible, King James Version (Old and New Testaments)",
+  "author": "Translators of the Authorized Version (1611)",
+  "translator": null,
+  "date_of_work": "1611 (standard Oxford text of 1769)",
+  "tradition": "scripture",
+  "language": "en",
+  "source_url": "https://ebible.org/Scriptures/eng-kjv_vpl.zip",
+  "license": "public domain (outside the UK; Crown letters patent apply in the UK only)",
+  "chars": 4768858,
+  "sections": 31102,
+  "notes": "Whole Old and New Testaments, 66 books, 31,102 verses; # per book, ## per verse (\"## Genesis 23:7\"). Standard 1769 Oxford text from the eBible.org/CrossWire plain-text (VPL) edition; words supplied by the translators (printed in italics) are in [square brackets]; pilcrows (¶) kept; Psalm titles are part of verse 1. Project Gutenberg #10 was unavailable (HTTP 503)."
+ }
+]

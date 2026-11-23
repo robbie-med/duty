@@ -1,0 +1,72 @@
+[
+ {
+  "file": "aristotle-politics-book1.md",
+  "title": "Politics, Book I",
+  "author": "Aristotle",
+  "translator": "Benjamin Jowett",
+  "date_of_work": "c. 350 BC (tr. 1885)",
+  "tradition": "classical",
+  "language": "en",
+  "source_url": "http://classics.mit.edu/Aristotle/politics.1.one.html",
+  "license": "public domain (Jowett translation, 1885; via MIT Internet Classics Archive)",
+  "chars": 49440,
+  "sections": 14,
+  "notes": "Book I whole, chapters 1-13 (MIT labels them 'Part'). Project Gutenberg was down for maintenance, and its Politics (#6762) is the Ellis translation, so Jowett was taken from the MIT Internet Classics Archive."
+ },
+ {
+  "file": "xenophon-oeconomicus.md",
+  "title": "Oeconomicus (The Economist)",
+  "author": "Xenophon",
+  "translator": "H. G. Dakyns",
+  "date_of_work": "c. 362 BC (tr. 1897)",
+  "tradition": "classical",
+  "language": "en",
+  "source_url": "https://www.gutenberg.org/ebooks/1173",
+  "license": "public domain (Dakyns translation, 1897; Project Gutenberg eBook #1173, via the xmission PG mirror)",
+  "chars": 208974,
+  "sections": 22,
+  "notes": "Whole dialogue, chapters 1-21, with Dakyns's footnotes as '> [n]' quote lines after the paragraph that cites them. Fetched from the xmission Project Gutenberg mirror (gutenberg.org was down for maintenance)."
+ },
+ {
+  "file": "pseudo-aristotle-oeconomica-book1.md",
+  "title": "Oeconomica, Book I (the household)",
+  "author": "Pseudo-Aristotle",
+  "translator": "E. S. Forster",
+  "date_of_work": "c. 300 BC (tr. 1920)",
+  "tradition": "classical",
+  "language": "en",
+  "source_url": "https://archive.org/details/oeconomica01arisuoft",
+  "license": "public domain (Forster translation, Oxford 1920, published before 1931; scan via Internet Archive)",
+  "chars": 13332,
+  "sections": 7,
+  "notes": "Book I only (chapters 1-6: household, wife, slaves, the householder); Book II (finance anecdotes) left out as off-topic. Forster did not translate 'Book III'. OCR of the 1920 Oxford edition, hand-checked against the scan text: marginal Bekker line numbers and running heads removed, footnotes dropped except the Hesiod and Aristotle cross-references (kept inline as [note: ...]); chapter headings carry the Bekker page where each chapter starts."
+ },
+ {
+  "file": "filmer-patriarcha.md",
+  "title": "Patriarcha, or The Natural Power of Kings",
+  "author": "Sir Robert Filmer",
+  "translator": null,
+  "date_of_work": 1680,
+  "tradition": "english",
+  "language": "en",
+  "source_url": "https://github.com/textcreationpartnership/A41308",
+  "license": "public domain (1680; EEBO-TCP Phase I, CC0)",
+  "chars": 147707,
+  "sections": 55,
+  "notes": "1680 first edition, whole: Heylyn's letter + chapters I-III. Each chapter's printed argument comes first, then the numbered sections (n) as headings. The 1680 printing misnumbers some sections in ch. III (12 and 15 twice, no 11 or 14); kept as printed. 17th-century English royalist rather than ancient, filed under classical as requested. EEBO-TCP keyed transcription (TEI XML from the textcreationpartnership GitHub mirror; quod.lib.umich.edu was behind a bot challenge). Long s normalised; marginal notes inlined as [marg.: ...]; TCP illegibility marks (•, 〈◊〉, 〈…〉) and '〈 in non-Latin alphabet 〉' kept as in the transcription. Filed under English custom: an English work on patriarchal government."
+ },
+ {
+  "file": "cicero-de-officiis-1-53-58.md",
+  "title": "De Officiis, Book I, §§ 53–58 (the degrees of kinship and fellowship)",
+  "author": "Marcus Tullius Cicero",
+  "translator": "Walter Miller",
+  "date_of_work": "44 BC (tr. 1913)",
+  "tradition": "classical",
+  "language": "en",
+  "source_url": "https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Cicero/de_Officiis/1C*.html",
+  "license": "public domain (Walter Miller, Loeb Classical Library 1913; via LacusCurtius)",
+  "chars": 4599,
+  "sections": 7,
+  "notes": "Book I §§53-58 (chs. 17-18) only. LacusCurtius's own editorial notes left out; Miller's text only."
+ }
+]

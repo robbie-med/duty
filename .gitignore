@@ -1,0 +1,9 @@
+data/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+way/the-way-export.json
+sources/private/
+build/
+dist/

@@ -153,7 +153,13 @@ The page is `web/index.html` plus `web/maps.js` (lenses, zoom, Fan, Duties, Atla
 | `./run.sh export-way` | write the current duties to `way/the-way-export.json` |
 | `./run.sh test` | the tests |
 
-## A public, read-only copy
+## The published site (duty.robbiemed.org)
+The site at duty.robbiemed.org is GitHub Pages: plain files on the `gh-pages` branch, rebuilt from `main` on every push
+(`.github/workflows/pages.yml`, `tools/build_static.py`). It has no server: `web/static-api.js` loads Python in the
+visitor's browser (Pyodide) and `static_api.py` answers the page there, exactly as `server.py` would, over the six
+example families, read-only. The book search is only in the program itself.
+
+## A public, read-only copy on your own server
 Set `PUBLIC_HOST` to the site's host name and serve it on the open port (`FAMILY_HOST=0.0.0.0`) or behind a reverse
 proxy that passes the `Host` header. Requests for that host can read everything and change nothing: the server
 refuses every write, and the page shows a banner and says so when someone tries. Requests for 127.0.0.1 still edit

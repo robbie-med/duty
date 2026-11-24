@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fffdf8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="The Way">
+<title data-i18n>The Way</title>
+<style>
+:root{--paper:#f6f1e7;--card:#fffdf8;--ink:#23201b;--mute:#7a7265;--line:#e2d9c8;--seal:#8c2f1b;
+  --kept:#3b7d4f;--strained:#c98a1b;--broken:#b33a2b;--severed:#1d1b19;--unset:#b9b0a0;--open:#2f6f9f;
+  --top:env(safe-area-inset-top,0px);--bot:env(safe-area-inset-bottom,0px);color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--paper);color:var(--ink)}
+body{font:16px/1.45 system-ui,-apple-system,"Noto Sans KR",sans-serif;padding:calc(56px + var(--top)) 0 calc(68px + var(--bot));overscroll-behavior-y:contain}
+h1,h2,h3{font-family:Georgia,"Noto Serif KR",serif;font-weight:600;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+.ko{font-family:"Noto Serif KR",serif;color:var(--seal)}
+.about{font-size:15.5px;line-height:1.6}.about .lead{font-size:19px;font-weight:600}.about h3{margin:20px 0 4px}.about dt{font-weight:600;margin-top:10px}.about dd{margin:2px 0 0 0}
+.mute{color:var(--mute)}
+.small{font-size:13px}
+/* chrome */
+.top{position:fixed;top:0;left:0;right:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);padding:var(--top) 6px 0;height:calc(56px + var(--top));display:flex;align-items:center;gap:4px}
+.top h1{font-size:19px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:6px}
+.top h1 span{color:var(--seal)}
+.iconbtn{width:44px;height:44px;border:0;background:none;border-radius:22px;display:grid;place-items:center;font-size:22px;cursor:pointer;flex:none}
+.iconbtn:active{background:#0000000d}
+.egochip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 12px 6px 6px;display:flex;align-items:center;gap:7px;max-width:52vw;cursor:pointer;flex:none}
+.egochip b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:20;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:var(--bot)}
+.tabs button{flex:1;border:0;background:none;padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;color:var(--mute);cursor:pointer;position:relative}
+.tabs button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs button.on{color:var(--seal);font-weight:600}
+.tabs .pip{position:absolute;top:3px;left:calc(50% + 7px);min-width:17px;height:17px;border-radius:9px;background:var(--seal);color:#fff;font-size:10px;line-height:17px;padding:0 4px;font-weight:600}
+main{padding:12px 12px 24px;max-width:640px;margin:0 auto}
+/* building blocks */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card>h3{font-size:17px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.card>h3 .grow{flex:1}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1;min-width:0}
+.list{margin:0 -14px}
+.item{display:flex;align-items:center;gap:12px;padding:10px 14px;min-height:56px;border-top:1px solid var(--line);cursor:pointer;text-decoration:none}
+.item:active{background:#0000000a}
+.item .t{flex:1;min-width:0}
+.item .t b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .t small{display:block;color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .end{text-align:right;font-size:13px;color:var(--mute);flex:none}
+.chev{color:#c4bba9;font-size:20px;flex:none}
+.av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:14px;flex:none;border:2px solid var(--c,#8d8473);background:color-mix(in srgb,var(--c,#8d8473) 14%,#fff);color:var(--ink)}
+.av.f{border-radius:50%}.av.m{border-radius:12px}
+.av.dead{border-style:dashed;background:#ece6d9;color:#6d665a}
+.av.lg{width:64px;height:64px;font-size:22px}
+.av.cut{background:#1d1b19;color:#fff;border-color:#1d1b19}
+.badge{display:inline-block;font-size:10.5px;border-radius:4px;padding:1px 6px;color:#fff;background:var(--b,#7a7265);text-transform:uppercase;letter-spacing:.04em;font-weight:600;vertical-align:2px;white-space:nowrap}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--unset);flex:none}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:0 14px;min-height:44px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;font-weight:500}
+.btn:active{background:#0000000d}
+.btn.pri{background:var(--seal);border-color:var(--seal);color:#fff}
+.btn.block{width:100%}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btns .btn{flex:1 1 140px}
+.seg{display:flex;background:#ebe4d6;border-radius:10px;padding:3px;gap:3px;margin-bottom:10px}
+.seg button{flex:1;border:0;background:none;border-radius:8px;min-height:36px;font-size:14px;cursor:pointer;color:var(--mute)}
+.seg button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 3px #0002}
+.search{position:sticky;top:calc(56px + var(--top));z-index:5;background:var(--paper);padding:2px 0 10px;margin-top:-2px}
+.search input{width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:11px 14px;font-size:16px}
+.ghead{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--seal);font-weight:600;margin:16px 4px 6px}
+.empty{text-align:center;color:var(--mute);padding:28px 10px}
+/* stat ring + tiles */
+.ring{width:84px;height:84px;flex:none}
+.ring circle{fill:none;stroke-width:9}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{text-decoration:none;color:inherit;display:block;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--paper);border-left:4px solid var(--line);cursor:pointer}
+.tile b{display:block;font-family:Georgia,serif;font-size:24px;line-height:1.1}
+.tile span{font-size:12.5px;color:var(--mute)}
+.tile.warn{border-left-color:var(--strained)}.tile.bad{border-left-color:var(--broken)}.tile.ok{border-left-color:var(--kept)}.tile.ok b{color:var(--mute)}
+/* clan */
+details.house{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;border-left:4px solid #8d8473}
+details.house.headhouse{border-left-color:var(--seal)}details.house.gone{border-left-color:var(--strained)}details.house.mine{box-shadow:0 0 0 2px var(--ink)}
+details.house>summary{list-style:none;display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;min-height:64px}
+details.house>summary::-webkit-details-marker{display:none}
+details.house>summary .t{flex:1;min-width:0}details.house>summary .t b{display:block;font-weight:600}
+details.house>summary .t small{display:block;color:var(--mute);font-size:13px}
+details.house>summary::after{content:"›";color:#b5ac99;font-size:24px;transform:rotate(90deg);transition:transform .15s}
+details.house[open]>summary::after{transform:rotate(-90deg)}
+details.house .hsub{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);padding:10px 14px 4px;border-top:1px solid var(--line)}
+details.house .hsub a{text-transform:none;letter-spacing:0;font-size:13px}
+.item.mem{border-top:1px dotted var(--line);min-height:50px}
+.item.mem.hit{background:#f6e7b8!important}
+.item.byright{box-shadow:inset 4px 0 var(--strained);background:#fbf6ea}.item.bound{box-shadow:inset 4px 0 var(--open);background:#f2f6fa}
+.headcard{border-left:4px solid var(--seal)}
+.trunk{width:2px;height:14px;background:var(--line);margin:-12px auto 0}
+details.succ summary{font-size:14px;cursor:pointer;padding:6px 0 0}details.succ ol{margin:6px 0 0;padding-left:22px;font-size:14px}details.succ li{margin:3px 0}
+.hbar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#e6dfd0;gap:2px;margin-top:5px}.hbar.big{height:14px;border-radius:7px}
+.hbar i{display:block;height:100%}
+.srow{padding:9px 0;border-top:1px solid var(--line)}.srow:first-of-type{border-top:0}
+/* person page */
+.hero{display:flex;gap:14px;align-items:center}
+.hero h2{font-size:24px;line-height:1.2}
+.relbox{background:var(--paper);border-radius:10px;padding:10px 12px;margin-top:12px;font-size:15px}
+.relbox div+div{margin-top:3px}
+.bondrow{margin-top:10px}
+.bondrow .lbl{font-size:13px;color:var(--mute);margin-bottom:5px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:999px;padding:0 14px;min-height:38px;background:#fff;cursor:pointer;font-size:14px}
+.chip.on{color:#fff}
+.chip.on.kept{background:var(--kept);border-color:var(--kept)}.chip.on.strained{background:var(--strained);border-color:var(--strained)}
+.chip.on.broken{background:var(--broken);border-color:var(--broken)}.chip.on.severed{background:var(--severed);border-color:var(--severed)}
+details.sph{border-top:1px solid var(--line);margin:0 -14px}
+details.sph>summary{list-style:none;padding:12px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:15px}
+details.sph>summary::-webkit-details-marker{display:none}
+details.sph>summary::after{content:"›";margin-left:auto;color:#b5ac99;font-size:22px;transform:rotate(90deg);transition:transform .15s}
+details.sph[open]>summary::after{transform:rotate(-90deg)}
+.duty{padding:10px 14px;border-top:1px dotted var(--line)}
+.duty p{margin:0 0 4px;font-size:15px}
+details.dx>summary{list-style:none;cursor:pointer;font-size:15px;margin:0 0 4px}details.dx>summary::-webkit-details-marker{display:none}
+details.dx>summary::before{content:"▸";display:inline-block;width:1em;color:var(--mute);transition:transform .12s}
+details.dx[open]>summary::before{transform:rotate(90deg)}details.dx>.src{margin:0 0 6px 1em}
+.duty .src{font-size:12px;color:var(--mute)}
+.marks{display:flex;gap:5px;margin-top:8px}
+.marks button{flex:1;min-width:0;padding:0 2px;white-space:nowrap;min-height:40px;border:1px solid var(--line);background:#fff;border-radius:9px;cursor:pointer;font-size:14px;color:var(--mute)}
+.marks button.on.kept{background:var(--kept);border-color:var(--kept);color:#fff}
+.marks button.on.failing{background:var(--broken);border-color:var(--broken);color:#fff}
+.marks button.on.poorly{background:var(--strained);border-color:var(--strained);color:#fff}
+.marks button.on.na{background:var(--unset);border-color:var(--unset);color:#fff}
+.tag{font-size:10px;border:1px dashed var(--line);border-radius:3px;padding:0 4px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}
+.mini{display:inline-flex;height:7px;width:60px;border-radius:4px;overflow:hidden;background:#e6dfd0;vertical-align:middle;gap:1px}
+.mini i{display:block;height:100%}
+/* family navigator */
+.trail{display:flex;gap:6px;overflow-x:auto;padding:0 2px 10px;scrollbar-width:none;font-size:13px}
+.trail a{white-space:nowrap;color:var(--mute);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--card)}
+.trail a.on{color:var(--ink);border-color:var(--ink)}
+.focus{text-align:center;padding:18px 14px}
+.focus .av{margin:0 auto 8px}
+.focus h2{font-size:23px}
+.kinrow{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 6px;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -14px;padding-left:14px;padding-right:14px}
+.kin{flex:none;width:104px;scroll-snap-align:start;text-align:center;cursor:pointer;padding:8px 4px;border-radius:12px;border:1px solid var(--line);background:var(--paper)}
+.kin:active{background:#0000000d}
+.kin .av{margin:0 auto 6px}
+.kin b{display:block;font-size:13px;font-weight:600;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.kin small{display:block;font-size:11.5px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* examine */
+.deck{position:relative;min-height:380px;touch-action:pan-y}
+.dcard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 6px 20px #0000000f;user-select:none;-webkit-user-select:none;touch-action:pan-y;will-change:transform}
+.dcard.fly{transition:transform .25s ease-out,opacity .25s}
+.dcard .who{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.dcard .sph{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.dcard .text{font-family:Georgia,"Noto Serif KR",serif;font-size:22px;line-height:1.35;margin:6px 0 14px}
+.dcard .stamp{position:absolute;top:18px;padding:4px 12px;border:3px solid;border-radius:8px;font-weight:700;font-size:20px;opacity:0;transform:rotate(-8deg);text-transform:uppercase;letter-spacing:.06em}
+.dcard .stamp.k{right:16px;color:var(--kept);border-color:var(--kept)}
+.dcard .stamp.f{left:16px;color:var(--broken);border-color:var(--broken);transform:rotate(8deg)}
+.bigmarks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.bigmarks button{min-height:56px;border-radius:14px;border:0;font-size:16px;font-weight:600;cursor:pointer;color:#fff}
+.bigmarks .failing{background:var(--broken)}.bigmarks .poorly{background:var(--strained)}.bigmarks .kept{background:var(--kept)}
+.bigmarks button{line-height:1.15;padding:4px}
+.bar{height:6px;background:#e6dfd0;border-radius:3px;overflow:hidden;margin:4px 0 12px}
+.bar i{display:block;height:100%;background:var(--kept)}
+.toast{position:fixed;left:12px;right:12px;bottom:calc(78px + var(--bot));z-index:40;background:var(--ink);color:#fff;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;transform:translateY(calc(100% + 90px));transition:transform .2s,visibility .2s;max-width:616px;margin:0 auto;visibility:hidden;pointer-events:none}
+.toast.on{transform:none;visibility:visible;pointer-events:auto}
+.toast button{border:0;background:none;color:#f3c7b8;font-weight:700;cursor:pointer;min-height:36px;padding:0 6px}
+.loading{padding:60px 0;text-align:center;color:var(--mute)}
+select.plain{border:1px solid var(--line);background:var(--card);border-radius:10px;min-height:40px;padding:0 10px;max-width:100%}
+textarea.note,input.note{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff;margin-top:6px;font-size:15px}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="iconbtn" id="backBtn" hidden aria-label="Back" data-i18n-attr="aria-label" onclick="goBack()">‹</button>
+  <h1 id="title">The Way<span> 道</span></h1>
+  <button class="egochip" id="egoChip" onclick="go('#pick')" aria-label="Who you stand as" data-i18n-attr="aria-label"></button>
+</header>
+<main id="view"><div class="loading" data-i18n>Loading…</div></main>
+<nav class="tabs" id="tabs">
+  <button data-r="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span data-i18n>Today</span></button>
+  <button data-r="family"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4M5 16.5V14h14v2.5M12 11.5v2.5"/></svg><span data-i18n>Family</span></button>
+  <button data-r="people"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.8.7 3 2.4 3.5 5.2"/></svg><span data-i18n>People</span></button>
+  <button data-r="examine"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 9l2 2 4-4M8 16h8"/></svg><span data-i18n>Examine</span><span class="pip" id="pip" hidden></span></button>
+  <button data-r="clan"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 4l9 5.5M5.5 10v8M10 10v8M14 10v8M18.5 10v8M3 20.5h18"/></svg><span data-i18n>Clan</span></button>
+</nav>
+<div class="toast" id="toast"><span class="grow" id="toastMsg"></span><button id="toastBtn" data-i18n>Undo</button></div>
+
+<script src="/static-api.js"></script>
+<script src="/i18n.js"></script>
+<script src="/about.js"></script>
+<script>
+"use strict";
+/* The Way, for the phone. Same server and data as the full site (index.html); this page is served at "/"
+   to mobile browsers, and always at /m. Routes live in the address hash so the back button works:
+   #today · #family/ID · #people · #examine[/ID] · #clan[/authority|state|you] · #p/ID · #pick */
+let S = null, E = null, egoId = null, navDepth = 0;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const P = id => S.people[id];
+const nm = id => P(id) ? P(id).name : "?";
+const dead = p => p.living === undefined ? !!p.death : !p.living;
+const yr = p => (p.birth || "").slice(0, 4);
+const life = p => (yr(p) || p.death) ? `${yr(p) || "?"}–${p.death ? (p.death === "?" ? "" : p.death.slice(0, 4)) : ""}` : "";
+const NOW = new Date(), THIS_YEAR = NOW.getFullYear();   // ages only
+const age = p => { const b = parseInt(yr(p)); if (!b) return null; const d = dead(p) ? parseInt((p.death || "").slice(0, 4)) : THIS_YEAR; return d ? d - b : null; };
+const standing = p => (p.standing && p.standing !== "member") ? p.standing : "";
+const ST_COL = {entering: "#2f6f9f", estranged: "#c98a1b", cut_off: "#1d1b19", outside: "#8a8578"};
+const SEV = {kept: 1, strained: 2, broken: 3, severed: 4};
+const CLOSE = new Set(["P", "PP", "S", "PC", "C", "CC", "CS", "SP", "PS", "SC", "X", "K", "Q", "PSC"]);
+const SIDE = {self: ["me", "#23201b"], spouse: ["Spouse", "#eda100"], father: ["Father’s side", "#2a78d6"], mother: ["Mother’s side", "#eb6834"],
+  siblings: ["Brothers & sisters", "#1baf7a"], children: ["Descendants", "#e87ba4"], inlaws: ["Spouse’s side", "#008300"], none: ["No known tie", "#b9b0a0"]};
+
+const READONLY_MSG = "This is a read-only demonstration of The Way with an example family. Download it to keep your own family's record.";
+window.alert = (a => m => { if (m !== "read-only") a(m); })(window.alert.bind(window));   // the refusal is said once
+window.addEventListener("unhandledrejection", e => { if (e.reason && e.reason.message === "read-only") e.preventDefault(); });
+async function api(method, path, body) {
+  if (method !== "GET" && typeof S !== "undefined" && S && S.read_only) { alert(t(READONLY_MSG)); throw new Error("read-only"); }
+  const r = await fetch(path, {method, headers: body ? {"Content-Type": "application/json"} : {}, body: body ? JSON.stringify(body) : undefined});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+const ofFamily = id => (S.familySet ||= new Set(S.family || [])).has(id);   // under the Head's authority (the server decides)
+async function loadState() {
+  const s = await api("GET", "/api/state");
+  s.people = Object.fromEntries(s.people.map(p => [p.id, p]));
+  s.duties = Object.fromEntries(s.duties.map(d => [d.id, {...d, attest: []}]));
+  for (const a of s.attest || []) if (s.duties[a.duty_id]) s.duties[a.duty_id].attest.push(a);
+  const kids = {}, parents = {}, spouses = {};
+  for (const l of s.links) { (kids[l.parent_id] ||= []).push(l.child_id); (parents[l.child_id] ||= []).push(l.parent_id); }
+  for (const u of s.unions) { (spouses[u.a_id] ||= []).push([u.b_id, u.status]); (spouses[u.b_id] ||= []).push([u.a_id, u.status]); }
+  s.ix = {kids, parents, spouses};
+  S = s;
+  if (S.read_only && !document.getElementById("ro-banner")) document.body.insertAdjacentHTML("afterbegin",
+    `<div id="ro-banner" data-i18n data-i18n-key="Read-only demonstration with an example family. Nothing here can be changed." style="background:#7a2a1a;color:#fff;text-align:center;padding:6px 12px;font-size:13px">${t("Read-only demonstration with an example family. Nothing here can be changed.")}</div>`);
+}
+async function loadEgo() { E = egoId != null && P(egoId) ? await api("GET", "/api/ego/" + egoId) : null; }
+async function standAs(id, then = "#today") {
+  egoId = id; localStorage.setItem("way-ego", id);
+  $("#view").innerHTML = `<div class="loading">${t("Standing as {name}…", {name: esc(nm(id))})}</div>`;
+  rollup = null; await loadEgo(); chrome(); go(then, true);
+}
+
+/* ---------- small helpers ---------- */
+function sideOf(id) {
+  if (id === egoId) return "self";
+  const r = E && E.rels[id]; if (!r) return "none";
+  const p = r.them.path;
+  if (/^[SXKQ]$/.test(p)) return "spouse";
+  if (/^[SXKQ]/.test(p)) return "inlaws";
+  if (p[0] === "C") return "children";
+  if (/^PS?C/.test(p)) return "siblings";
+  let v = id;
+  for (let i = 0; i < 12 && E.rels[v] && E.rels[v].via !== egoId; i++) v = E.rels[v].via;
+  return P(v) && P(v).sex === "f" ? "mother" : "father";
+}
+const initials = n => n.replace(/\(.*?\)/g, "").trim().split(/[\s,]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "?";
+function av(id, lg) {
+  const p = P(id), st = standing(p);
+  return `<span class="av ${p.sex === "f" ? "f" : "m"}${dead(p) ? " dead" : ""}${st === "cut_off" ? " cut" : ""}${lg ? " lg" : ""}" style="--c:${st && st !== "cut_off" ? ST_COL[st] : SIDE[sideOf(id)][1]}">${esc(initials(p.name))}</span>`;
+}
+const relEn = id => id === egoId ? t("you") : E && E.rels[id] ? E.rels[id].them.en.split(" (")[0] : t("no known tie");
+const relKo = id => E && E.rels[id] ? native(E.rels[id].them).split(" (")[0] : "";
+const stBadge = p => standing(p) ? ` <span class="badge" style="--b:${ST_COL[standing(p)]}">${esc(t(S.meta.standings[standing(p)]))}</span>` : "";
+const headBadge = id => id === S.head ? ` <span class="badge" style="--b:var(--seal)">${t("Head of the family")}</span>` : "";
+function bondOf(id) {
+  const r = E && E.rels[id]; if (!r) return "unset";
+  return [r.bond_out && r.bond_out.state, r.bond_in && r.bond_in.state].filter(Boolean).sort((a, b) => SEV[b] - SEV[a])[0] || "unset";
+}
+function counts(ids, marks) {
+  const c = {kept: 0, poorly: 0, failing: 0, na: 0, open: 0, all: 0};
+  for (const d of ids) { if (!S.duties[d] || S.duties[d].status === "retired") continue; c.all++; const m = marks && marks[d]; c[m && c[m.state] != null ? m.state : "open"]++; }
+  return c;
+}
+const mini = c => c.all ? `<span class="mini">${[["failing", "var(--broken)"], ["poorly", "var(--strained)"], ["kept", "var(--kept)"], ["na", "#b9b0a0"]].filter(([k]) => c[k]).map(([k, col]) => `<i style="flex:${c[k]};background:${col}"></i>`).join("")}<i style="flex:${c.open};background:transparent"></i></span>` : "";
+function nearness(a, b) {
+  const pa = E.rels[a].them.path, pb = E.rels[b].them.path;
+  const w = p => ({S: 0, P: 1, C: 2, PC: 3, PSC: 3.5, CC: 4, PP: 5, SP: 6, CS: 7, X: 8, K: 8})[p] ?? 10 + p.length;
+  return w(pa) - w(pb) || (P(a).birth || "9999").localeCompare(P(b).birth || "9999");
+}
+function personItem(id, extra = "") {
+  const p = P(id), r = E && E.rels[id];
+  const c = r ? counts(r.owe, r.marks_out) : null;
+  return `<a class="item" href="#p/${id}">${av(id)}<div class="t"><b>${esc(p.name)}${stBadge(p)}</b><small>${esc(relEn(id))}${relKo(id) ? ` · <span class="ko">${esc(relKo(id))}</span>` : ""}${life(p) ? " · " + esc(life(p)) : ""}</small></div>
+    <div class="end">${extra || (c && c.all ? `${mini(c)}<br>${c.open ? t("{n} open", {n: c.open}) : c.failing ? `<span style="color:var(--broken)">${t("{n} failing", {n: c.failing})}</span>` : c.poorly ? `<span style="color:var(--strained)">${t("{n} not doing well", {n: c.poorly})}</span>` : t("all marked")}` : "")}</div>${r ? `<span class="dot" style="background:var(--${bondOf(id)})" title="${t("bond")}"></span>` : ""}</a>`;
+}
+function toast(msg, undo) {
+  const tb = $("#toast"); $("#toastMsg").textContent = msg;
+  $("#toastBtn").hidden = !undo; $("#toastBtn").onclick = () => { tb.classList.remove("on"); undo(); };
+  tb.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => tb.classList.remove("on"), 4200);
+}
+const buzz = () => navigator.vibrate && navigator.vibrate(12);
+
+/* ---------- routing ---------- */
+const TITLES = {today: "Today", family: "Family", people: "People", examine: "Examine", clan: "Clan", more: "Clan", p: "", pick: "Stand as…"};
+/* every history entry carries its depth in the app, so ‹ goes back only while there is somewhere in the app to go */
+function go(h, replace) { if (replace) { history.replaceState({d: navDepth}, "", h); route(); } else location.hash = h; }
+function goBack() { if (history.state && history.state.d > 0) history.back(); else go("#today", true); }
+window.addEventListener("hashchange", () => {
+  if (!history.state || history.state.d == null) history.replaceState({d: navDepth + 1}, "", location.hash);
+  navDepth = history.state.d; route();
+});
+function chrome() {
+  const e = egoId != null && P(egoId);
+  $("#egoChip").innerHTML = e ? `${av(egoId)}<b>${esc(P(egoId).name.split(" ")[0])}</b>` : `<b>${t("Stand as…")}</b>`;
+  const open = E ? examineQueue("mine").length : 0;
+  $("#pip").hidden = !open; $("#pip").textContent = open > 99 ? "99+" : open;
+}
+function route() {
+  let [r, arg] = location.hash.slice(1).split("/");
+  if (r === "more") { r = "clan"; arg = "you"; history.replaceState(history.state, "", "#clan/you"); }
+  const name = TITLES[r] !== undefined ? r : "today";
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.r === name || (name === "p" && b.dataset.r === "people")));
+  const sub = name === "p" || name === "pick" || (name === "family" && arg && +arg !== egoId) || (name === "examine" && arg);
+  $("#backBtn").hidden = !sub;
+  $("#title").innerHTML = name === "today" && !sub ? `${t("The Way")}<span> 道</span>` : esc(t(TITLES[name] || ""));
+  if (!E && name !== "pick" && name !== "clan") return renderWelcome();
+  ({today: renderToday, family: renderFamily, people: renderPeople, examine: renderExamine, clan: renderClan, p: renderPerson, pick: renderPick})[name](arg ? +arg || arg : null);
+  window.scrollTo(0, 0);
+}
+$("#tabs").onclick = e => { const b = e.target.closest("button"); if (b) go("#" + b.dataset.r, true); };
+
+/* ---------- welcome / pick ---------- */
+function renderWelcome() {
+  $("#view").innerHTML = `<div class="card"><h3>${t("Where do you stand?")}</h3><p>${t("{n} people are in the tree. Choose yourself, then press {btn} on the More tab so the app remembers you.", {n: Object.keys(S.people).length, btn: `<b>${t("This is me")}</b>`})}</p>
+    <a class="btn pri block" href="#pick">${t("Choose a person")}</a></div>`;
+}
+function renderPick() {
+  $("#view").innerHTML = `<div class="search"><input type="search" id="pq" placeholder="${t("Type a name…")}" autocomplete="off"></div><div class="card" style="padding:0 14px"><div class="list" id="plist"></div></div>`;
+  const draw = () => {
+    const q = $("#pq").value.trim().toLowerCase();
+    let ps = Object.values(S.people);
+    if (q) ps = ps.filter(p => (p.name + " " + (p.ko_name || "")).toLowerCase().includes(q));
+    else if (S.me && P(S.me)) ps = [P(S.me), ...ps.filter(p => p.id !== S.me)];
+    ps = ps.sort((a, b) => (q ? 0 : (b.id === S.me) - (a.id === S.me)) || (dead(a) - dead(b)) || a.name.localeCompare(b.name)).slice(0, 60);
+    $("#plist").innerHTML = ps.map(p => `<div class="item" onclick="standAs(${p.id})">${av(p.id)}<div class="t"><b>${esc(p.name)}${p.id === S.me ? ` <span class="badge" style="--b:var(--kept)">${t("me")}</span>` : ""}</b><small>${esc(life(p))}${E && E.rels[p.id] ? " · " + t("{rel} of {name}", {rel: esc(relEn(p.id)), name: esc(nm(egoId))}) : ""}</small></div><span class="chev">›</span></div>`).join("") || `<div class="empty">${t("No one by that name.")}</div>`;
+  };
+  $("#pq").oninput = draw; draw();
+}
+
+/* ---------- Today ---------- */
+function renderToday() {
+  const ids = Object.keys(E.rels).map(Number), close = ids.filter(id => CLOSE.has(E.rels[id].them.path));
+  const tot = close.reduce((acc, id) => { const c = counts(E.rels[id].owe, E.rels[id].marks_out); for (const k in acc) acc[k] += c[k]; return acc; }, {kept: 0, poorly: 0, failing: 0, na: 0, open: 0, all: 0});
+  const done = tot.all - tot.open, pct = tot.all ? done / tot.all : 0, C = 2 * Math.PI * 36;
+  const ring = `<svg class="ring" viewBox="0 0 84 84"><circle cx="42" cy="42" r="36" stroke="#e6dfd0"/><circle cx="42" cy="42" r="36" stroke="var(--kept)" stroke-dasharray="${(C * pct).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 42 42)" stroke-linecap="round"/>
+    <text x="42" y="47" text-anchor="middle" style="font:600 17px Georgia,serif;fill:var(--ink)">${Math.round(pct * 100)}%</text></svg>`;
+  const unjudged = close.filter(id => !dead(P(id)) && !E.rels[id].bond_out).length;
+  const torn = ids.filter(id => ["strained", "broken", "severed"].includes(bondOf(id)));
+  const failing = ids.filter(id => counts(E.rels[id].owe, E.rels[id].marks_out).failing);
+  const keep = Object.keys(S.heads).map(Number).filter(k => S.heads[k] === egoId && k !== egoId && P(k) && !dead(P(k)));
+  const head = S.heads[egoId], allLiving = Object.values(S.people).filter(p => !dead(p) && ofFamily(p.id));
+  const headless = allLiving.filter(p => S.heads[p.id] == null).length, bound = Object.keys(S.bound).filter(k => ofFamily(+k)).length;
+  const greet = NOW.getHours() < 12 ? t("Good morning") : NOW.getHours() < 18 ? t("Good afternoon") : t("Good evening");
+  $("#view").innerHTML = `
+    <div class="card"><div class="row">${av(egoId, true)}<div class="grow"><div class="mute small">${greet}${S.me === egoId ? "" : " · " + t("standing as")}</div><h2 style="font-size:22px">${esc(nm(egoId))}</h2>
+      <div class="small">${egoId === S.head ? t("Head of the family") : head === egoId ? t("Head of his own house") : head != null ? t("Under {name}", {name: esc(nm(head))}) : t("Under the Head of the family")}${keep.length ? " · " + t("keeps {n}", {n: keep.length}) : ""}</div></div></div></div>
+    <div class="card"><h3>${t("Your duties to those closest")}</h3><div class="row">${ring}<div class="grow small">
+      <div>${t("{n} not yet examined", {n: `<b style="font-size:18px">${tot.open}</b>`})}</div><div><span style="color:var(--kept)">${t("{n} kept", {n: tot.kept})}</span> · <span style="color:var(--strained)">${t("{n} not doing well", {n: tot.poorly})}</span> · <span style="color:var(--broken)">${t("{n} failing", {n: tot.failing})}</span> · ${t("{n} n/a", {n: tot.na})}</div>
+      <div class="mute">${t("{n} close kin", {n: close.length})} · ${t("{n} duties", {n: tot.all})}</div></div></div>
+      <div class="btns"><a class="btn pri" href="#examine">${tot.open ? t("Examine one by one") : t("Review")}</a></div></div>
+    <div class="card"><h3>${t("Needs attention")}</h3><div class="tiles">
+      <a class="tile ${unjudged ? "warn" : "ok"}" href="#people" onclick="peopleFilter='unjudged'"><b>${unjudged}</b><span>${t("close kin with no bond judged")}</span></a>
+      <a class="tile ${torn.length ? "bad" : "ok"}" href="#people" onclick="peopleFilter='torn'"><b>${torn.length}</b><span>${t("bonds strained, broken or severed")}</span></a>
+      <a class="tile ${failing.length ? "bad" : "ok"}" href="#people" onclick="peopleFilter='failing'"><b>${failing.length}</b><span>${t("people you are failing a duty to")}</span></a>
+      <a class="tile ${headless ? "bad" : bound ? "warn" : "ok"}" href="#clan/authority"><b>${headless + bound}</b><span>${headless ? t("in a headless house ({n} kept by a bound kinsman)", {n: bound}) : t("kept by a kinsman bound to act for their house")}</span></a></div></div>
+    ${keep.length ? `<div class="card"><h3>${t("In your keeping")}</h3><div class="kinrow">${keep.sort((a, b) => nearness(a, b)).map(k => kinCard(k)).join("")}</div></div>` : ""}`;
+}
+
+/* ---------- Family navigator ---------- */
+let trail = [];
+function kinCard(id, note) {
+  const p = P(id);
+  return `<a class="kin" href="#family/${id}" style="text-decoration:none">${av(id)}<b>${esc(p.name)}</b><small>${esc(note || relEn(id))}</small><small>${esc(life(p))}</small></a>`;
+}
+function renderFamily(id) {
+  id = id && P(id) ? id : egoId;
+  trail = trail.filter(x => x !== id).concat(id).slice(-6);
+  const x = S.ix, p = P(id);
+  const par = (x.parents[id] || []).slice().sort((a, b) => (P(a).sex === "m" ? 0 : 1) - (P(b).sex === "m" ? 0 : 1));
+  const sps = x.spouses[id] || [], kids = [...new Set(x.kids[id] || [])].sort((a, b) => (P(a).birth || "9999").localeCompare(P(b).birth || "9999"));
+  const sibs = [...new Set(par.flatMap(q => x.kids[q] || []))].filter(s => s !== id).sort((a, b) => (P(a).birth || "9999").localeCompare(P(b).birth || "9999"));
+  const r = E.rels[id];
+  const section = (title, list, note) => `<div class="card"><h3>${title}<span class="grow"></span><span class="mute small" style="font-family:system-ui;font-weight:400">${list.length || ""}</span></h3>
+    ${list.length ? `<div class="kinrow">${list.map(k => kinCard(...(Array.isArray(k) ? k : [k]))).join("")}</div>` : `<div class="mute small">${note}</div>`}</div>`;
+  const ST = {married: "", widowed: t("widowed"), separated: t("separated"), divorced: t("divorced"), paramour: t("living together, unmarried")};
+  $("#view").innerHTML = `
+    <div class="trail">${trail.map(tid => `<a href="#family/${tid}" class="${tid === id ? "on" : ""}">${esc(nm(tid).split(" ")[0])}</a>`).join("")}</div>
+    <div class="card focus">${av(id, true)}<h2>${esc(p.name)}${p.ko_name ? ` <span class="ko">${esc(p.ko_name)}</span>` : ""}</h2>
+      <div class="mute">${esc(life(p))}${age(p) != null ? ` · ${dead(p) ? t("died at {n}", {n: age(p)}) : t("age {n}", {n: age(p)})}` : ""}</div>
+      <div style="margin-top:4px">${id === egoId ? t("This is where you stand") : r ? `${t("Your {rel}", {rel: `<b>${esc(r.them.en)}</b>`})} ${native(r.them) ? `<span class="ko">${esc(native(r.them))}</span>` : ""}` : t("No known tie to you")}${stBadge(p)}${headBadge(id)}</div>
+      <div class="btns"><a class="btn pri" href="#p/${id}">${id === egoId ? t("Your page") : t("Duties & bond")}</a>${id !== egoId ? `<button class="btn" onclick="standAs(${id})">${t("Stand here")}</button>` : ""}</div></div>
+    ${section(t("Parents"), par, t("No parents on record."))}
+    ${section(t("Spouse"), sps.map(([s, st]) => [s, [relEn(s), ST[st]].filter(Boolean).join(" · ")]), t("No spouse on record."))}
+    ${section(t("Children"), kids, t("No children on record."))}
+    ${section(t("Brothers & sisters"), sibs, par.length ? t("No brothers or sisters on record.") : t("Add parents to find brothers and sisters."))}`;
+}
+
+/* ---------- People ---------- */
+let peopleFilter = "close", peopleQ = "";
+const PFILTERS = {close: "Close", kin: "All kin", unjudged: "Not judged", torn: "Torn", failing: "Failing", poorly: "Not doing well", everyone: "Everyone"};
+function renderPeople() {
+  $("#view").innerHTML = `<div class="search"><input type="search" id="sq" placeholder="${t("Search everyone…")}" value="${esc(peopleQ)}" autocomplete="off">
+    <div class="trail" style="margin-top:8px;padding-bottom:0">${Object.entries(PFILTERS).map(([k, v]) => `<a href="#people" class="${peopleFilter === k ? "on" : ""}" onclick="peopleFilter='${k}';renderPeople();return false">${t(v)}</a>`).join("")}</div></div><div id="plist2"></div>`;
+  const draw = () => {
+    const q = peopleQ.trim().toLowerCase(), rels = Object.keys(E.rels).map(Number);
+    let ids = q ? Object.values(S.people).filter(p => (p.name + " " + (p.ko_name || "")).toLowerCase().includes(q)).map(p => p.id)
+      : peopleFilter === "everyone" ? Object.keys(S.people).map(Number)
+      : peopleFilter === "close" ? rels.filter(id => CLOSE.has(E.rels[id].them.path))
+      : peopleFilter === "unjudged" ? rels.filter(id => CLOSE.has(E.rels[id].them.path) && !dead(P(id)) && !E.rels[id].bond_out)
+      : peopleFilter === "torn" ? rels.filter(id => ["strained", "broken", "severed"].includes(bondOf(id)))
+      : peopleFilter === "failing" ? rels.filter(id => counts(E.rels[id].owe, E.rels[id].marks_out).failing)
+      : peopleFilter === "poorly" ? rels.filter(id => counts(E.rels[id].owe, E.rels[id].marks_out).poorly)
+      : rels;
+    const groups = {};
+    for (const id of ids) if (id !== egoId) (groups[sideOf(id)] ||= []).push(id);
+    const order = ["spouse", "siblings", "children", "father", "mother", "inlaws", "none"];
+    const sortIn = (a, b) => (E.rels[a] && E.rels[b] ? nearness(a, b) : 0) || (dead(P(a)) - dead(P(b))) || nm(a).localeCompare(nm(b));
+    $("#plist2").innerHTML = order.filter(g => groups[g]).map(g => `<div class="ghead">${t(SIDE[g][0])} · ${groups[g].length}</div>
+      <div class="card" style="padding:0 14px"><div class="list" style="margin-top:-1px">${groups[g].sort(sortIn).slice(0, 150).map(id => personItem(id)).join("")}</div></div>`).join("")
+      || `<div class="empty">${q ? t("No one by that name.") : t("No one here. That is good news.")}</div>`;
+  };
+  $("#sq").oninput = e => { peopleQ = e.target.value; draw(); };
+  draw();
+}
+
+/* ---------- Person page ---------- */
+function headText(id) {
+  const p = P(id); if (dead(p)) return "";
+  const h = S.heads[id], right = id in S.heads_right ? S.heads_right[id] : h, b = S.bound[id], bits = [];
+  const link = k => `<a href="#p/${k}">${esc(nm(k))}</a>`;
+  const gone = k => P(k) && P(k).headship ? ` (${esc(t(S.meta.headship[P(k).headship]))})` : "";
+  if (h === id && right === id) bits.push(id === S.head ? t("Head of the family and of his own house") : t("Head of his own house"));
+  else if (b) bits.push(t("Acting head, bound by kinship: {name}", {name: link(b.by)}) + (right != null && right !== id ? " · " + t("by right under {name}", {name: link(right)}) + gone(right) : ""));
+  else if (right != null && right !== id && right !== h) bits.push(t("By right under {name}; acting head: {head}", {name: link(right) + gone(right), head: h != null ? link(h) : t("the Head of the family")}));
+  else if (h != null && h !== id) bits.push(t("Under the headship of {name}", {name: link(h)}));
+  else if (h == null) bits.push(t("A headless house: under the Head of the family"));
+  if (p.headship) bits.push(`<b style="color:var(--broken)">${esc(t(S.meta.headship[p.headship]))}</b>`);
+  const keep = Object.keys(S.heads).filter(k => S.heads[k] === id && +k !== id && !dead(P(k))).length;
+  if (keep) bits.push(t("keeps {n}", {n: keep}));
+  if (p.carried_by && P(p.carried_by)) bits.push(t("carried by {name}", {name: link(p.carried_by)}));
+  return `<div class="small" style="margin-top:8px">${bits.join(" · ")}</div>`;
+}
+function bondRow(from, to, cur, label) {
+  const st = cur ? cur.state : "";
+  return `<div class="bondrow"><div class="lbl">${label}</div><div class="chips">${["kept", "strained", "broken", "severed"].map(x =>
+    `<button class="chip ${x}${st === x ? " on" : ""}" onclick="setBond(${from},${to},'${st === x ? "unset" : x}')">${t(x)}</button>`).join("")}</div>
+    ${st ? `<input class="note" placeholder="${t("note: why, since when")}" value="${esc(cur.note || "")}" onchange="setBond(${from},${to},'${st}',this.value)">` : ""}</div>`;
+}
+async function setBond(from, to, state, note) {
+  const cur = from === egoId ? E.rels[to].bond_out : E.rels[from].bond_in;
+  await api("POST", "/api/bond", {from_id: from, to_id: to, state, note: note ?? (cur && state !== "unset" ? cur.note : "")});
+  buzz(); const y = scrollY; await loadEgo(); route(); scrollTo(0, y);
+}
+const sphereSum = c => `<span class="ssum"><span class="mute small" style="font-weight:400">${c.all}${c.open ? " · " + t("{n} open", {n: c.open}) : ""}</span> ${mini(c)}</span>`;
+function dutyBlock(ids, marks, who, toward, open) {
+  const by = {};
+  for (const d of ids) { const x = S.duties[d]; if (x && x.status !== "retired") (by[x.sphere] ||= []).push(x); }
+  const keys = Object.keys(S.meta.spheres).filter(k => by[k]);
+  if (!keys.length) return `<div class="mute small" style="padding:4px 0 2px">${t("Nothing set down yet.")}</div>`;
+  return keys.map(k => { const c = counts(by[k].map(d => d.id), marks);
+    return `<details class="sph" data-sphere="${k}" data-ids="${by[k].map(d => d.id).join(",")}"${open ? " open" : ""}><summary>${esc(t(S.meta.spheres[k]))} ${sphereSum(c)}</summary>
+      ${by[k].map(d => { const m = marks && marks[d.id] ? marks[d.id].state : "";
+        const b = (st, label) => `<button class="${st}${m === st ? " on" : ""}" onclick="markDuty(${who},${toward},${d.id},'${m === st ? "unset" : st}',this)">${label}</button>`;
+        return `<div class="duty"><details class="dx"><summary>${esc(dtext(d))}</summary><div class="src">${esc(t(S.meta.traditions[d.tradition] || d.tradition))}${d.citation ? " · " + esc(d.citation) : ""}${(() => { const ts = [...new Set(d.attest.map(a => a.tradition))].filter(x => x !== d.tradition); return ts.length ? " · " + t("also {list}", {list: ts.map(x => esc(t(S.meta.traditions[x] || x))).join(", ")}) : ""; })()}${d.status === "draft" ? ` <span class="tag">${t("draft")}</span>` : ""}</div></details>
+          <div class="marks">${b("kept", t("✓ Kept"))}${b("poorly", t("~ Not well"))}${b("failing", t("✕ Failing"))}${b("na", t("– N/A"))}</div></div>`; }).join("")}</details>`; }).join("");
+}
+async function markDuty(who, toward, duty, state, btn) {
+  await api("POST", "/api/mark", {person_id: who, toward_id: toward, duty_id: duty, state});
+  buzz();
+  const marks = who === egoId ? (toward === 0 ? E.marks_collective : E.rels[toward].marks_out) : E.rels[who].marks_in;
+  if (state === "unset") delete marks[duty]; else marks[duty] = {state};
+  const det = btn.closest("details.sph"), card = det && det.closest(".card");
+  if (det) {                                     // redraw this sphere's count and the card's bar
+    det.querySelector(".ssum").outerHTML = sphereSum(counts(det.dataset.ids.split(",").map(Number), marks));
+    const all = [...card.querySelectorAll("details.sph")].flatMap(d => d.dataset.ids.split(",").map(Number)), m = card.querySelector("h3 > .mini");
+    if (m) m.outerHTML = mini(counts(all, marks));
+  }
+  const box = btn.closest(".marks");
+  box.querySelectorAll("button").forEach(b => { const st = b.classList[0]; b.classList.toggle("on", st === state);
+    b.setAttribute("onclick", `markDuty(${who},${toward},${duty},'${st === state ? "unset" : st}',this)`); });
+  chrome();
+}
+function renderPerson(id) {
+  if (!P(id)) return go("#people", true);
+  const p = P(id), r = E.rels[id], me = id === egoId;
+  if (me) {
+    const c = counts(E.collective, E.marks_collective);
+    $("#title").textContent = p.name;
+    $("#view").innerHTML = `<div class="card"><div class="hero">${av(id, true)}<div><h2>${esc(p.name)}${p.ko_name ? ` <span class="ko">${esc(p.ko_name)}</span>` : ""}</h2>
+      <div class="mute">${esc(life(p))}${age(p) != null ? ` · ${t("age {n}", {n: age(p)})}` : ""}</div>${stBadge(p)}${headBadge(id)}</div></div>${headText(id)}
+      <div class="btns"><a class="btn" href="#family/${id}">${t("Your family")}</a><a class="btn" href="/full#ego=${id}" onclick="useFull()">${t("Full site")}</a></div></div>
+      ${E.house_line && E.house_line.length ? `<div class="card"><h3>${t("Order of succession over your house")}</h3><ol style="margin:0;padding-left:22px">${E.house_line.map(x => `<li><a href="#p/${x.id}">${esc(nm(x.id))}</a> <span class="mute small">${esc(whyText(x.why || ""))}</span>${x.holds && x.id === (E.house_line.find(y => y.holds) || {}).id ? ` <b style="color:var(--seal)">${t("acting")}</b>` : ""}</li>`).join("")}</ol></div>` : ""}
+      <div class="card"><h3>${t("To your household and the clan")}<span class="grow"></span>${mini(c)}</h3>${dutyBlock(E.collective, E.marks_collective, egoId, 0)}</div>`;
+    return;
+  }
+  const first = s => s.split(" ")[0], oc = r ? counts(r.owe, r.marks_out) : null, ic = r ? counts(r.owed, r.marks_in) : null;
+  $("#title").textContent = p.name;
+  $("#view").innerHTML = `
+    <div class="card"><div class="hero">${av(id, true)}<div class="grow"><h2>${esc(p.name)}${p.ko_name ? ` <span class="ko">${esc(p.ko_name)}</span>` : ""}</h2>
+      <div class="mute">${esc(life(p))}${age(p) != null ? ` · ${dead(p) ? t("died at {n}", {n: age(p)}) : t("age {n}", {n: age(p)})}` : ""}</div><div>${stBadge(p)}${headBadge(id)}</div></div></div>
+      ${r ? `<div class="relbox"><div>${t("{name} is your {rel}", {name: esc(first(p.name)), rel: `<b>${esc(r.them.en)}</b>`})} ${native(r.them) ? `<span class="ko">${esc(native(r.them))}</span>` : ""}${r.them.chon ? ` <span class="mute">· ${r.them.chon}촌</span>` : ""}</div>
+        <div>${t(p.sex === "f" ? "You are her {rel}" : p.sex === "m" ? "You are his {rel}" : "You are their {rel}", {rel: `<b>${esc(r.me.en)}</b>`})} ${native(r.me) ? `<span class="ko">${esc(native(r.me))}</span>` : ""}</div></div>` : `<div class="relbox">${t("No known tie to {name}.", {name: esc(nm(egoId))})}</div>`}
+      ${headText(id)}
+      ${p.standing_note ? `<div class="small" style="margin-top:6px"><b>${esc(t(S.meta.standings[standing(p)] || ""))}</b> ${esc(p.standing_date || "")} ${esc(p.standing_note)}</div>` : ""}
+      <div class="btns">${r && oc.open ? `<a class="btn pri" href="#examine/${id}">${t("Examine {n} duties", {n: oc.open})}</a>` : ""}<a class="btn" href="#family/${id}">${t("Family")}</a><button class="btn" onclick="standAs(${id})">${t("Stand here")}</button></div></div>
+    ${r ? `<div class="card"><h3>${t("The bond")}</h3>${bondRow(egoId, id, r.bond_out, t("You toward {name}", {name: esc(first(p.name))}))}${bondRow(id, egoId, r.bond_in, t("{name} toward you", {name: esc(first(p.name))}))}
+      <div class="btns"><button class="btn" onclick="history_(${id})">${t("History")}</button></div><div id="hist"></div></div>
+    <div class="card"><h3>${t("You owe {name}", {name: esc(first(p.name))})}<span class="grow"></span>${mini(oc)}</h3>${dutyBlock(r.owe, r.marks_out, egoId, id, false)}</div>
+    <div class="card"><h3>${t("{name} owes you", {name: esc(first(p.name))})}<span class="grow"></span>${mini(ic)}</h3>${dutyBlock(r.owed, r.marks_in, id, egoId, false)}</div>` : ""}
+    <div class="btns" style="margin:0 0 12px"><a class="btn" href="/full#ego=${egoId}&sel=${id}" onclick="useFull()">${t("Open on the full site")}</a></div>`;
+}
+async function history_(id) {
+  const h = await api("GET", `/api/history?a=${egoId}&b=${id}`), when = ts => new Date(ts * 1000).toLocaleDateString();
+  $("#hist").innerHTML = `<div class="list" style="margin-top:10px">${h.bonds.map(x => `<div class="item" style="cursor:default"><div class="t"><b>${esc(nm(x.from_id).split(" ")[0])} → ${esc(nm(x.to_id).split(" ")[0])}: ${t(x.state)}</b><small>${esc(x.note || "")}</small></div><div class="end">${when(x.at)}</div></div>`).join("")
+    || `<div class="item mute" style="cursor:default">${t("No bond judged yet.")}</div>`}</div>`;
+}
+
+/* ---------- Examine: one duty at a time ---------- */
+let exMode = "mine", exSphere = "", exSkipped = new Set(), exDone = 0, exLast = null;
+function examineQueue(mode, only) {
+  const out = [];
+  const ids = Object.keys(E.rels).map(Number).filter(id => (only ? id === only : CLOSE.has(E.rels[id].them.path)) && !dead(P(id))).sort(nearness);
+  for (const id of ids) { const r = E.rels[id], list = mode === "mine" ? r.owe : r.owed, marks = mode === "mine" ? r.marks_out : r.marks_in;
+    for (const d of list) { const x = S.duties[d]; if (x && x.status !== "retired" && !marks[d]) out.push({id, d}); } }
+  if (mode === "mine" && !only) for (const d of E.collective) { const x = S.duties[d]; if (x && x.status !== "retired" && !E.marks_collective[d]) out.push({id: 0, d}); }
+  return out;
+}
+function renderExamine(only) {
+  only = only && E.rels[only] ? only : null;
+  const all = examineQueue(exMode, only), q = all.filter(x => !exSkipped.has(x.id + ":" + x.d) && (!exSphere || S.duties[x.d].sphere === exSphere));
+  const total = only ? counts(exMode === "mine" ? E.rels[only].owe : E.rels[only].owed).all : null;
+  const spheres = Object.keys(S.meta.spheres).filter(k => all.some(x => S.duties[x.d].sphere === k));
+  const it = q[0];
+  const who = it ? (it.id === 0 ? null : it.id) : null;
+  const head = `<div class="seg"><button class="${exMode === "mine" ? "on" : ""}" onclick="exMode='mine';exSkipped.clear();route()">${t("What I owe")}</button><button class="${exMode === "theirs" ? "on" : ""}" onclick="exMode='theirs';exSkipped.clear();route()">${t("What they owe me")}</button></div>
+    <div class="row" style="margin-bottom:6px"><select class="plain grow" onchange="exSphere=this.value;route()"><option value="">${t("Every sphere")}</option>${spheres.map(k => `<option value="${k}"${exSphere === k ? " selected" : ""}>${esc(t(S.meta.spheres[k]))}</option>`).join("")}</select>
+      ${exSkipped.size ? `<button class="btn" onclick="exSkipped.clear();route()">${t("Bring back {n} skipped", {n: exSkipped.size})}</button>` : ""}</div>
+    <div class="small mute">${only ? t("{n} to examine toward {name}", {n: q.length, name: esc(nm(only))}) : t("{n} to examine among your close kin", {n: q.length})}${exDone ? " · " + t("{n} marked just now", {n: exDone}) : ""}</div>
+    ${only && total ? `<div class="bar"><i style="width:${100 * (total - all.length) / total}%"></i></div>` : `<div style="height:12px"></div>`}`;
+  if (!it) { $("#view").innerHTML = head + `<div class="card empty"><div style="font-size:40px">✓</div><h3 style="margin:6px 0">${t("All examined")}</h3><p class="small">${exSkipped.size ? t("Only the ones you skipped remain.") : t("Nothing left to mark here.")}</p>${only ? `<a class="btn" href="#p/${only}">${t("Back to {name}", {name: esc(nm(only))})}</a>` : ""}</div>`; return; }
+  const d = S.duties[it.d], r = who ? E.rels[who] : null;
+  const toLine = exMode === "mine" ? (who ? `${t("You owe {name}", {name: `<b>${esc(nm(who))}</b>`})} <span class="mute">· ${t("your {rel}", {rel: esc(relEn(who))})}</span>` : t("You owe {name}", {name: `<b>${t("your household and the clan")}</b>`}))
+    : `${t("{name} owes you", {name: `<b>${esc(nm(who))}</b>`})} <span class="mute">· ${t("your {rel}", {rel: esc(relEn(who))})}</span>`;
+  $("#view").innerHTML = head + `<div class="deck"><div class="dcard" id="dcard"><span class="stamp k">${t("Kept")}</span><span class="stamp f">${t("Failing")}</span>
+      <div class="who">${who ? av(who) : `<span class="av m" style="--c:var(--seal)">家</span>`}<div class="small">${toLine}</div></div>
+      <div class="sph">${esc(t(S.meta.spheres[d.sphere]))}</div>
+      <div class="text">${esc(dtext(d))}</div>
+      <div class="small mute">${esc(t(S.meta.traditions[d.tradition] || d.tradition))}${d.citation ? " · " + esc(d.citation) : ""}${d.status === "draft" ? ` <span class="tag">${t("draft")}</span>` : ""}</div>
+      <div class="bigmarks"><button class="failing" onclick="exMark('failing')">${t("✕ Failing")}</button><button class="poorly" onclick="exMark('poorly')">${t("~ Not doing well")}</button><button class="kept" onclick="exMark('kept')">${t("✓ Kept")}</button></div>
+      <div class="row" style="margin-top:10px;justify-content:space-between"><span class="row" style="gap:8px"><button class="btn" onclick="exSkip()">${t("Skip")}</button><button class="btn" onclick="exMark('na')">${t("– N/A")}</button></span>${who ? `<a class="btn" href="#p/${who}">${t("All toward {name}", {name: esc(nm(who).split(" ")[0])})}</a>` : ""}</div>
+    </div><p class="small mute" style="text-align:center">${t("Swipe right for kept, left for failing.")}</p></div>`;
+  exMark.cur = {it, who: exMode === "mine" ? egoId : who, toward: exMode === "mine" ? (who || 0) : egoId};
+  swipe($("#dcard"));
+}
+async function exMark(state) {
+  const {it, who, toward} = exMark.cur, card = $("#dcard");
+  if (card && (state === "kept" || state === "failing")) { card.classList.add("fly"); card.style.transform = `translateX(${state === "kept" ? 120 : -120}%) rotate(${state === "kept" ? 12 : -12}deg)`; card.style.opacity = 0; }
+  await api("POST", "/api/mark", {person_id: who, toward_id: toward, duty_id: it.d, state});
+  buzz(); exDone++;
+  const marks = exMode === "mine" ? (toward === 0 ? E.marks_collective : E.rels[toward].marks_out) : E.rels[who].marks_in;
+  marks[it.d] = {state};
+  exLast = {who, toward, d: it.d, marks};
+  toast(state === "na" ? t("Marked does not apply") : state === "poorly" ? t("Marked not doing well") : state === "kept" ? t("Marked kept") : t("Marked failing"), async () => {
+    await api("POST", "/api/mark", {person_id: exLast.who, toward_id: exLast.toward, duty_id: exLast.d, state: "unset"});
+    delete exLast.marks[exLast.d]; exDone = Math.max(0, exDone - 1); chrome(); route();
+  });
+  chrome(); setTimeout(route, card && (state === "kept" || state === "failing") ? 180 : 0);
+}
+function exSkip() { const {it} = exMark.cur; exSkipped.add(it.id + ":" + it.d); route(); }
+function swipe(card) {
+  let x0 = null, y0 = 0, dx = 0, locked = null;
+  const k = card.querySelector(".stamp.k"), f = card.querySelector(".stamp.f");
+  card.addEventListener("pointerdown", e => { if (e.target.closest("button,a")) return; x0 = e.clientX; y0 = e.clientY; dx = 0; locked = null; });
+  card.addEventListener("pointermove", e => {
+    if (x0 == null) return;
+    const mx = e.clientX - x0, my = e.clientY - y0;
+    if (locked == null && Math.hypot(mx, my) > 8) { locked = Math.abs(mx) > Math.abs(my) ? "x" : "y"; if (locked === "x") card.setPointerCapture(e.pointerId); }
+    if (locked !== "x") return;
+    dx = mx; card.style.transform = `translateX(${dx}px) rotate(${dx / 22}deg)`;
+    k.style.opacity = Math.max(0, Math.min(1, dx / 90)); f.style.opacity = Math.max(0, Math.min(1, -dx / 90));
+  });
+  const end = () => {
+    if (x0 == null) return; x0 = null;
+    if (locked === "x" && Math.abs(dx) > 90) return exMark(dx > 0 ? "kept" : "failing");
+    card.classList.add("fly"); card.style.transform = ""; k.style.opacity = f.style.opacity = 0;
+    setTimeout(() => card.classList.remove("fly"), 260);
+  };
+  card.addEventListener("pointerup", end); card.addEventListener("pointercancel", end);
+}
+
+/* ---------- Clan: Authority · State of the clan · You ---------- */
+const CLAN_SEGS = [["authority", "Authority"], ["state", "The clan"], ["you", "You"], ["about", "About"]];
+let authFilter = "all", authQ = "", rollup = null;
+function renderClan(seg) {
+  seg = CLAN_SEGS.some(s => s[0] === seg) ? seg : (localStorage.getItem("way-clan") || "authority");
+  localStorage.setItem("way-clan", seg);
+  $("#view").innerHTML = `<div class="seg">${CLAN_SEGS.map(([k, v]) => `<button class="${seg === k ? "on" : ""}" onclick="go('#clan/${k}',true)">${t(v)}</button>`).join("")}</div><div id="clanBody"></div>`;
+  if (!E && seg !== "you" && seg !== "about") { $("#clanBody").innerHTML = `<div class="card"><a class="btn pri block" href="#pick">${t("Choose who you stand as")}</a></div>`; return; }
+  ({authority: renderAuthority, state: renderClanState, you: renderYou, about: () => { $("#clanBody").innerHTML = `<div class="card">${aboutHTML()}</div>`; }})[seg]();
+}
+/* open B's page as seen by A: the person page always speaks from whoever you stand as */
+async function openPair(a, b) { if (a !== egoId) await standAs(a, "#p/" + b); else go("#p/" + b); }
+
+/* Authority: the Head of the family over every house, and who is in each man's keeping */
+function authority() {
+  const living = Object.values(S.people).filter(p => !dead(p) && ofFamily(p.id)).map(p => p.id), keep = {}, headless = [];
+  for (const id of living) { const h = S.heads[id];
+    if (h == null) { headless.push(id); continue; }
+    if (h !== id) (keep[h] ||= []).push(id); }
+  const heads = [...new Set([...Object.keys(keep).map(Number), ...living.filter(id => S.heads[id] === id)])].filter(h => P(h));
+  return {living, keep, headless, heads};
+}
+const twin = id => Object.values(S.people).some(x => x.id !== id && x.name === nm(id)) && yr(P(id)) ? ` <span class="mute" style="font-weight:400">b. ${yr(P(id))}</span>` : "";
+const ageNum = id => { const a = age(P(id)); return a == null ? "" : a; };
+function houseCard(h, keep, open) {
+  const ms = (keep[h] || []).slice().sort((a, b) => (P(a).birth || "9999").localeCompare(P(b).birth || "9999"));
+  const bound = ms.filter(i => S.bound[i]), byRight = ms.filter(i => i in S.heads_right && S.heads_right[i] !== h && !S.bound[i]);
+  const own = ms.filter(i => !bound.includes(i) && !byRight.includes(i));
+  const minors = ms.filter(i => ageNum(i) !== "" && ageNum(i) < 18).length, elders = ms.filter(i => ageNum(i) !== "" && ageNum(i) >= 75).length;
+  const mine = h === egoId || ms.includes(egoId), p = P(h);
+  const q = authQ.trim().toLowerCase(), hit = id => q && (nm(id) + " " + (P(id).ko_name || "")).toLowerCase().includes(q);
+  const row = (id, cls) => `<a class="item mem ${cls || ""}${hit(id) ? " hit" : ""}" href="#p/${id}">${av(id)}<div class="t"><b>${esc(nm(id))}${twin(id)}${stBadge(P(id))}</b><small>${esc(relEn(id))}${relKo(id) ? ` · <span class="ko">${esc(relKo(id))}</span>` : ""}</small></div><div class="end">${ageNum(id)}</div><span class="chev">›</span></a>`;
+  const rights = [...new Set(byRight.map(i => S.heads_right[i]))];
+  return `<details class="house${mine ? " mine" : ""}${h === S.head ? " headhouse" : ""}${p.headship ? " gone" : ""}"${open ? " open" : ""}>
+    <summary>${av(h)}<div class="t"><b>${esc(p.name)}${twin(h)}${headBadge(h)}${p.headship ? ` <span class="badge" style="--b:var(--strained)">${esc(t(S.meta.headship[p.headship]))}</span>` : ""}</b>
+      <small>${ms.length ? `${t("{n} in his keeping", {n: ms.length})}${minors ? " · " + t("{n} under 18", {n: minors}) : ""}${elders ? " · " + t("{n} aged 75+", {n: elders}) : ""}` : t("his own house")}${bound.length ? ` · <span style="color:var(--open)">${t("bound for {n}", {n: bound.length})}</span>` : ""}${byRight.length ? ` · <span style="color:var(--strained)">${t("acting for {n}", {n: byRight.length})}</span>` : ""}${mine ? ` · <b>${t("your house")}</b>` : ""}</small></div></summary>
+    ${own.length ? `<div class="hsub">${t("In his keeping")}</div>${own.map(i => row(i)).join("")}` : ""}
+    ${byRight.length ? `<div class="hsub">${t("Acting for another: by right under {names}", {names: rights.map(r => `<a href="#p/${r}">${esc(nm(r))}</a>${P(r) && P(r).headship ? ` (${esc(t(S.meta.headship[P(r).headship]))})` : ""}`).join(", ")})}</div>${byRight.map(i => row(i, "byright")).join("")}` : ""}
+    ${bound.length ? `<div class="hsub">${t("{bound} by kinship to act as head for", {bound: `<span class="badge" style="--b:var(--open)">${t("bound")}</span>`})}</div>${bound.map(i => row(i, "bound")).join("")}` : ""}
+    <div class="btns" style="padding:0 14px 12px"><a class="btn" href="#p/${h}">${t("His page")}</a>${h !== egoId ? `<button class="btn" onclick="standAs(${h},'#clan/authority')">${t("Stand as him")}</button>` : ""}</div></details>`;
+}
+function renderAuthority() {
+  const {living, keep, headless, heads} = authority(), top = S.head;
+  const left = living.filter(i => P(i).headship), busy = heads.filter(h => (keep[h] || []).length >= 8);
+  const nBound = Object.keys(S.bound).length;
+  const myHouse = heads.find(h => h === egoId || (keep[h] || []).includes(egoId));
+  const tq = authQ.trim().toLowerCase(), hit = id => (nm(id) + " " + (P(id).ko_name || "")).toLowerCase().includes(tq);
+  let list = heads.filter(h => h !== top);
+  if (authFilter === "bound") list = list.filter(h => (keep[h] || []).some(i => S.bound[i])).concat(top != null && (keep[top] || []).some(i => S.bound[i]) ? [top] : []);
+  if (authFilter === "byright") list = heads.filter(h => (keep[h] || []).some(i => i in S.heads_right && S.heads_right[i] !== h && !S.bound[i]));
+  if (authFilter === "large") list = busy;
+  if (tq) list = heads.filter(h => hit(h) || (keep[h] || []).some(hit));
+  list = [...new Set(list)].sort((a, b) => (b === myHouse) - (a === myHouse) || (keep[b] || []).length - (keep[a] || []).length || nm(a).localeCompare(nm(b)));
+  const filters = [["all", t("Every house")], ["bound", `${t("Bound kinsman")} · ${nBound}`], ["byright", `${t("Acting for another")} · ${left.length}`], ["large", `${t("Eight or more")} · ${busy.length}`]];
+  $("#clanBody").innerHTML = `
+    <div class="tiles" style="margin-bottom:12px">
+      <div class="tile"><b>${heads.length}</b><span>${t("houses with a man acting at their head")}</span></div>
+      <a class="tile ${headless.length ? "bad" : "ok"}" href="#clan/authority" onclick="document.getElementById('headless')?.scrollIntoView({behavior:'smooth'});return false"><b>${headless.length}</b><span>${t("in a headless house no kinsman is bound to")}</span></a>
+      <a class="tile ${nBound ? "warn" : "ok"}" href="#clan/authority" onclick="authFilter='bound';authQ='';renderAuthority();return false"><b>${nBound}</b><span>${t("kept by a kinsman bound to act")}</span></a>
+      <a class="tile ${left.length ? "warn" : "ok"}" href="#clan/authority" onclick="authFilter='byright';authQ='';renderAuthority();return false"><b>${left.length}</b><span>${t("men who have stepped down or abandoned their family")}</span></a></div>
+    ${top != null ? `<div class="card headcard"><div class="mute small">${t("Head of the family")}</div>
+      <a class="item" href="#p/${top}" style="border:0;margin:0 -14px">${av(top, true)}<div class="t"><b style="font-size:19px">${esc(nm(top))}</b><small style="white-space:normal">${S.head_named ? t("named") : t("by rule: the senior living man of the father’s line")} · ${t("keeps {n}", {n: (keep[top] || []).length})}</small></div><span class="chev">›</span></a>
+      <details class="succ"><summary>${t("Order of succession")}</summary><ol>${S.succession.map(x => `<li><a href="#p/${x.id}">${esc(nm(x.id))}</a>${x.holds ? "" : ` <span class="mute small">${t("(passed over)")}</span>`}${gone(x.id)}</li>`).join("")}</ol></details></div>
+      <div class="trunk"></div>` : `<div class="card" style="border-color:var(--broken)">${t("{label} no living man found. Name one on the full site's Clan tab.", {label: `<b>${t("No Head of the family:")}</b>`})}</div>`}
+    <div class="search" style="top:calc(56px + var(--top))"><input type="search" id="aq" placeholder="${t("Who is under whom? Type a name…")}" value="${esc(authQ)}" autocomplete="off">
+      <div class="trail" style="margin-top:8px;padding-bottom:0">${filters.map(([k, v]) => `<a href="#clan/authority" class="${authFilter === k && !tq ? "on" : ""}" onclick="authFilter='${k}';authQ='';renderAuthority();return false">${v}</a>`).join("")}</div></div>
+    ${authFilter === "all" && !tq && top != null ? houseCard(top, keep, myHouse === top) : ""}
+    ${list.map(h => houseCard(h, keep, !!tq || h === myHouse)).join("") || `<div class="empty">${t("No house matches.")}</div>`}
+    ${headless.length && !tq ? `<div class="card" id="headless" style="border-left:4px solid var(--broken)"><h3>${t("Headless, and no kinsman bound")}</h3>
+      <p class="small mute" style="margin:0 0 6px">${t("These fall directly under the Head of the family. Record a husband, father or brother on the full site to set them under a man.")}</p>
+      <div class="list">${headless.map(i => personItem(i, ageNum(i))).join("")}</div></div>` : ""}
+    ${!tq ? `<div class="card"><h3>${t("Where you stand")}</h3><p class="small" style="margin:0">${headText(egoId).replace(/<div[^>]*>|<\/div>/g, "")}</p></div>` : ""}`;
+  const q = $("#aq"); q.oninput = () => { authQ = q.value; const pos = q.selectionStart; renderAuthority(); const n = $("#aq"); n.focus(); n.setSelectionRange(pos, pos); };
+}
+const gone = id => P(id) && P(id).headship ? ` <span class="badge" style="--b:var(--strained)">${esc(t(S.meta.headship[P(id).headship]))}</span>` : "";
+
+/* State of the clan: bonds, duties failing, by sphere and person, standing, households */
+async function renderClanState() {
+  const box = $("#clanBody");
+  if (!rollup || rollup.S !== S) { box.innerHTML = `<div class="loading">${t("Gathering…")}</div>`; rollup = Object.assign(await api("GET", "/api/rollup"), {S}); }
+  const R = rollup, c = R.bond_counts, judged = Object.values(c).reduce((a, b) => a + b, 0);
+  const bar = v => `<span class="hbar">${v.kept + (v.poorly || 0) + v.failing ? `<i style="flex:${v.kept};background:var(--kept)"></i><i style="flex:${v.poorly || 0};background:var(--strained)"></i><i style="flex:${v.failing};background:var(--broken)"></i>` : ""}</span>`;
+  const tally = v => `${t("{n} kept", {n: v.kept})} · ${t("{n} not well", {n: v.poorly || 0})} · ${t("{n} failing", {n: v.failing})}`;
+  const ST_ORDER = ["kept", "strained", "broken", "severed"];
+  const stCount = (k, n) => k === "kept" ? t("{n} kept", {n}) : k === "strained" ? t("{n} strained", {n}) : k === "broken" ? t("{n} broken", {n}) : t("{n} severed", {n});
+  const stand = Object.values(S.people).filter(p => standing(p));
+  const living = Object.values(S.people).filter(p => !dead(p) && ofFamily(p.id));
+  const headless = living.filter(p => S.heads[p.id] == null).length;
+  box.innerHTML = `
+    <div class="card"><h3>${t("What needs attention")}</h3><div class="tiles">
+      <a class="tile ${R.torn.length ? "bad" : "ok"}" href="#clan/state" onclick="document.getElementById('torn').scrollIntoView({behavior:'smooth'});return false"><b>${R.torn.length}</b><span>${t("bonds torn: strained, broken or severed")}</span></a>
+      <a class="tile ${R.failing.length ? "bad" : "ok"}" href="#clan/state" onclick="document.getElementById('failing').scrollIntoView({behavior:'smooth'});return false"><b>${R.failing.length}</b><span>${t("duties failing or not doing well")}</span></a>
+      <a class="tile ${headless ? "bad" : "ok"}" href="#clan/authority"><b>${headless}</b><span>${t("in a headless house no kinsman is bound to")}</span></a>
+      <a class="tile ${stand.length ? "warn" : "ok"}" href="#clan/state" onclick="document.getElementById('standing').scrollIntoView({behavior:'smooth'});return false"><b>${stand.length}</b><span>${t("not in full standing")}</span></a></div></div>
+    <div class="card" id="torn"><h3>${t("State of the bonds")}</h3>
+      ${judged ? `<div class="hbar big">${ST_ORDER.filter(k => c[k]).map(k => `<i style="flex:${c[k]};background:var(--${k})"></i>`).join("")}</div>
+        <div class="chips" style="margin:8px 0 4px">${ST_ORDER.map(k => `<span class="chip on ${k}" style="cursor:default;min-height:30px;display:inline-flex;align-items:center">${stCount(k, c[k] || 0)}</span>`).join("")}</div>`
+        : `<p class="small mute" style="margin:0">${t("No bond has been judged yet. Open a person and set the bond.")}</p>`}
+      ${R.torn.length ? `<div class="list" style="margin-top:8px">${R.torn.map(x => `<a class="item" href="#" onclick="openPair(${x.a},${x.b});return false">${av(x.a)}<div class="t"><b>${esc(nm(x.a))} → ${esc(nm(x.b))}</b><small>${esc(x.note || t("no note"))}</small></div><span class="chip on ${x.state}" style="min-height:28px;display:inline-flex;align-items:center;font-size:12px">${t(x.state)}</span></a>`).join("")}</div>` : ""}</div>
+    <div class="card" id="failing"><h3>${t("Duties failing or not doing well")}</h3>
+      ${R.failing.length ? `<div class="list">${R.failing.map(f => `<a class="item" href="#" onclick="${f.toward ? `openPair(${f.person},${f.toward})` : `openPair(${f.person},${f.person})`};return false">${av(f.person)}<div class="t"><b>${esc(nm(f.person))}${f.toward ? " → " + esc(nm(f.toward)) : " → " + t("the house")}</b><small style="white-space:normal">${esc(dtext(S.duties[f.duty]))}</small></div><span class="chip on ${f.state === "failing" ? "broken" : "strained"}" style="min-height:26px;display:inline-flex;align-items:center;font-size:11.5px;padding:0 9px;flex:none">${f.state === "failing" ? t("failing") : t("not well")}</span></a>`).join("")}</div>` : `<p class="small mute" style="margin:0">${t("None marked.")}</p>`}</div>
+    <div class="card"><h3>${t("By sphere")}</h3>${Object.keys(S.meta.spheres).map(k => { const v = R.per_sphere[k] || {kept: 0, poorly: 0, failing: 0};
+      return `<div class="srow"><div class="row"><span class="grow small">${esc(t(S.meta.spheres[k]))}</span><span class="small mute">${tally(v)}</span></div>${bar(v)}</div>`; }).join("")}</div>
+    <div class="card"><h3>${t("By person")}</h3>${Object.keys(R.per_person).length ? Object.entries(R.per_person).sort((a, b) => b[1].failing - a[1].failing || (b[1].poorly || 0) - (a[1].poorly || 0) || b[1].kept - a[1].kept).map(([id, v]) =>
+      `<a class="srow" href="#" onclick="openPair(${id},${id});return false" style="display:block;text-decoration:none"><div class="row"><span class="grow small"><b>${esc(nm(+id))}</b></span><span class="small mute">${tally(v)}</span></div>${bar(v)}</a>`).join("")
+      : `<p class="small mute" style="margin:0">${t("No duties marked yet.")}</p>`}</div>
+    <div class="card" id="standing"><h3>${t("Standing in the family")}</h3>${stand.length ? `<div class="list">${stand.map(p => personItem(p.id, `<span class="small">${esc(p.standing_date || "")}</span>`)).join("")}</div>`
+      : `<p class="small mute" style="margin:0">${t("Everyone on record is a member in full standing.")}</p>`}</div>
+    <div class="card"><h3>${t("Households")}</h3>${S.households.length ? S.households.map(h => { const ms = Object.values(S.people).filter(p => p.household_id === h.id);
+      return `<div class="srow"><b>${esc(h.name)}</b><div class="small mute">${t("head: {name}", {name: h.head_id && P(h.head_id) ? `<a href="#p/${h.head_id}">${esc(nm(h.head_id))}</a>` : t("none set")})}</div>
+        <div class="small">${ms.map(p => `<a href="#p/${p.id}">${esc(p.name)}</a>`).join(", ") || `<span class="mute">${t("no members yet")}</span>`}</div></div>`; }).join("") : `<p class="small mute" style="margin:0">${t("No households set. Add them on the full site.")}</p>`}</div>`;
+}
+
+/* You: who you stand as, and the switch to the full site */
+function renderYou() {
+  $("#clanBody").innerHTML = (E ? `
+    <div class="card"><h3>${t("Standing as")}</h3><div class="row">${av(egoId)}<div class="grow"><b>${esc(nm(egoId))}</b><div class="small mute">${S.me === egoId ? t("This is you") : t("Not set as you")}</div></div>
+      ${S.me === egoId ? "" : `<button class="btn" onclick="setMe()">${t("This is me")}</button>`}</div>
+      <div class="btns"><a class="btn" href="#pick">${t("Stand as someone else")}</a>${S.me && S.me !== egoId && P(S.me) ? `<button class="btn" onclick="standAs(${S.me},'#clan/you')">${t("Back to me")}</button>` : ""}</div></div>` : `<div class="card"><a class="btn pri block" href="#pick">${t("Choose who you stand as")}</a></div>`) + `
+    <div class="card"><h3>${t("Background")}</h3><p class="small" style="margin:0 0 8px">${S.mode === "example" ? t("Which example family to show.") : t("Which kinship terms appear beside the English.")}</p>
+      <select style="width:100%;min-height:44px" onchange="setBackground(this.value)">${Object.entries(S.backgrounds || {}).map(([k, v]) => `<option value="${k}"${k === S.background ? " selected" : ""}>${esc(t(v))}</option>`).join("")}</select></div>
+    <div class="card"><h3>${t("Language")}</h3>
+      <select style="width:100%;min-height:44px" onchange="setLang(this.value)">${langOptions()}</select></div>
+    <div class="card"><h3>${t("This is the phone view")}</h3><p class="small" style="margin:0 0 8px">${t("Phones get it automatically. The full site has the maps and the Atlas, editing people, and The Way's duty list.")}</p>
+      <div class="btns"><a class="btn" href="/full${egoId != null ? "#ego=" + egoId : ""}" onclick="useFull()">${t("Use the full site on this device")}</a></div></div>`;
+}
+async function setBackground(bg) {
+  if (S.mode === "example") { document.cookie = "way_bg=" + bg + "; path=/; max-age=31536000; samesite=lax"; localStorage.removeItem("way-ego"); location.hash = ""; location.reload(); return; }
+  try { await api("PUT", "/api/setting", {key: "background", value: bg}); await loadState(); route(); } catch (e) { toast(e.message); }
+}
+function useFull() { document.cookie = "way_ui=full; path=/; max-age=31536000; samesite=lax"; }
+async function setMe() { await api("PUT", "/api/setting", {key: "me", value: egoId}); await loadState(); route(); toast(t("Remembered: this is you")); }
+/* the language changed (setLang in i18n.js): draw the page again in it */
+function onLangChange() { if (!S) return; chrome(); route(); }
+
+/* ---------- start ---------- */
+(async () => {
+  try {
+    document.cookie = "way_ui=; path=/; max-age=0";              // on the phone view: back to automatic
+    await loadLang();
+    await loadState();
+    let hash = location.hash.slice(1);
+    const deep = hash.includes("=") ? new URLSearchParams(hash) : null;   // a link from the full site: #ego=12&sel=30
+    const saved = +((deep && deep.get("ego")) || localStorage.getItem("way-ego"));
+    egoId = P(saved) ? saved : (S.me && P(S.me) ? S.me : null);
+    await loadEgo(); chrome();
+    if (deep) hash = deep.get("sel") && P(+deep.get("sel")) ? "p/" + deep.get("sel") : "today";
+    history.replaceState({d: 0}, "", "#" + (hash || "today")); route();
+    maybeWelcome();
+  } catch (e) { $("#view").innerHTML = `<div class="card"><h3>${t("Could not load")}</h3><p class="small">${esc(e.message)}</p><button class="btn" onclick="location.reload()">${t("Try again")}</button></div>`; }
+})();
+</script>
+</body>
+</html>

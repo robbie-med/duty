@@ -1,0 +1,1410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Way</title>
+<style>
+:root{--paper:#f6f1e7;--card:#fffdf8;--ink:#23201b;--mute:#7a7265;--line:#d9d0bf;--seal:#8c2f1b;
+  --kept:#3b7d4f;--strained:#c98a1b;--broken:#b33a2b;--severed:#1d1b19;--unset:#b9b0a0}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 system-ui,"Noto Sans KR",sans-serif;display:flex;flex-direction:column}
+h1,h2,h3{font-family:Georgia,"Noto Serif KR",serif;font-weight:600;margin:0}
+header{display:flex;align-items:center;gap:18px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--card);flex-wrap:wrap}
+header h1{font-size:22px;letter-spacing:.02em}
+header h1 span{color:var(--seal);margin-left:6px}
+nav{display:flex;gap:2px}
+nav button{border:0;background:none;padding:8px 12px;font:inherit;color:var(--mute);cursor:pointer;border-bottom:2px solid transparent}
+nav button.on{color:var(--ink);border-color:var(--seal);font-weight:600}
+.grow{flex:1}
+button,select,input,textarea{font:inherit;color:inherit}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:5px 10px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--seal);border-color:var(--seal);color:#fff}
+.btn.sm{padding:2px 7px;font-size:13px}
+input[type=text],input[type=search],select,textarea{border:1px solid var(--line);border-radius:6px;padding:5px 8px;background:#fff;max-width:100%}
+.find{position:relative}
+.find input{width:230px}
+.drop{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:6px;z-index:30;max-height:340px;overflow:auto;box-shadow:0 6px 18px #0002;min-width:260px}
+.drop div{padding:6px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+.drop div:hover{background:var(--paper)}
+.drop small,.mute{color:var(--mute)}
+main{flex:1;min-height:0;display:none}
+main.on{display:flex}
+.stage{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+.stage .tools{flex:none;display:flex;gap:8px 10px;padding:9px 14px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line);z-index:5}
+.canvas{flex:1;min-height:0;position:relative;overflow:hidden}
+.canvas.scroll{overflow:auto}
+.canvas>svg{display:block;touch-action:none;cursor:grab;user-select:none}
+.canvas>svg.panning{cursor:grabbing}
+.zbtns{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:4px;z-index:6}
+.zbtns button{width:32px;height:32px;border:1px solid var(--line);background:var(--card);border-radius:6px;cursor:pointer;font-size:17px;line-height:1;box-shadow:0 1px 4px #0001}
+.zbtns button:hover{border-color:var(--ink)}
+select.lens{font-size:13px;padding:2px 6px}
+.lchip{display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:1px 7px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+.lchip i{width:10px!important;height:10px!important;border-radius:50%;margin:0!important}
+.lchip b{font-weight:600;color:var(--ink)}
+.lchip:hover{border-color:var(--line)}.lchip.on{border-color:var(--ink);background:var(--card)}.lchip.off{opacity:.45}
+.legend{flex-wrap:wrap}
+svg .faded,.faded{opacity:.14}
+svg.focus .wnode:not(.hi),svg.focus .spoke:not(.hi),svg.focus .nn:not(.hi),svg.focus .nl:not(.hi),svg.focus .nu:not(.hi){opacity:.12}
+svg.far .rl{display:none}
+.spoke.hi{stroke-width:4}
+/* fan */
+.fw path{fill-opacity:.2;stroke-width:1.3;cursor:pointer}
+.fw:hover path{fill-opacity:.38}
+.fw.dead path{fill-opacity:.09;stroke-dasharray:3 2}
+.fw.sel path{stroke:var(--seal)!important;stroke-width:3;fill-opacity:.4}
+.fw .nm{font-size:12px;font-weight:600}.fw .rl{font-size:10px;fill:var(--mute)}
+.fw.ego circle{fill:var(--ink);cursor:pointer}.fw.ego text{fill:#fff;font-size:12.5px}
+.fgap{cursor:pointer}.fgap path{fill:transparent;stroke:#b9b0a0;stroke-dasharray:4 4}.fgap:hover path{fill:#fff;stroke:var(--seal)}.fgap text{fill:#9a917f}
+.axis{stroke:var(--line)}.fanlabel{font-size:12px;fill:var(--mute)}
+/* duties grid */
+.dgrid{padding:14px 16px}
+.dtab td,.dtab th{font-size:12.5px;padding:4px 7px;white-space:nowrap}
+.dtab th.who{cursor:pointer;background:var(--card);font-weight:600;min-width:190px}
+.dtab th.who small{display:block;font-weight:400;color:var(--mute)}
+.dtab th.who .dot,.dtab .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.dtab tr.on th.who{box-shadow:inset 4px 0 var(--seal)}
+.dtab td.num{text-align:right;cursor:pointer}
+.dtab td.dc{cursor:pointer;background:var(--card)}.dtab td.dc:hover{background:#fff;outline:2px solid var(--ink);outline-offset:-2px}
+.dtab td.dc span:last-child{font-size:11px;color:var(--mute);margin-left:5px}
+.dtab td.empty{background:transparent}
+.sbar{display:inline-flex;height:10px;gap:2px;vertical-align:middle}
+.sbar i,.dgrid .legend i{display:block;height:100%;border-radius:2px}
+.dgrid .legend i{display:inline-block;width:14px;height:10px}
+i.failing{background:var(--broken)}i.poorly{background:var(--strained)}i.kept{background:var(--kept)}i.na{background:#cfc7b8}i.open{background:#c9d7e6;box-shadow:inset 0 0 0 1px #2f6f9f}
+.flash{animation:flash 1.4s}
+@keyframes flash{0%,40%{background:#f3dc9c}100%{background:transparent}}
+/* atlas */
+.nl{fill:none;stroke:#cbc2b0;stroke-width:1}
+.nu{stroke:var(--seal);stroke-width:2.2;stroke-opacity:.55}.nu.divorced{stroke-dasharray:3 3}.nu.paramour{stroke-dasharray:1 3}
+.nl.hi{stroke:var(--ink);stroke-width:2}.nu.hi{stroke-opacity:1;stroke-width:3}
+.nn{cursor:pointer}.nn circle{stroke:var(--paper);stroke-width:2}
+.nn text{font-size:9px;fill:var(--mute);display:none}
+.nn.alive text,.nn.hi text,.nn.sel text,svg.near .nn text{display:block}
+.nn.alive text{fill:var(--ink);font-size:10px}
+.nn.hi text{font-size:12px;fill:var(--ink);font-weight:600}
+.nn .ring{fill:none!important;stroke-width:2.2}.nn .ring.ego{stroke:var(--ink)}.nn .ring.head{stroke:var(--seal)}
+.nn.sel circle:not(.ring){stroke:var(--seal);stroke-width:3}
+.clan{fill:#fffdf8;stroke:var(--seal);stroke-width:1.5;stroke-opacity:.5}.clanlab{font-size:15px;font-weight:600;fill:var(--seal)}
+.lineblob{fill:none;stroke:var(--mute);stroke-width:1.2;stroke-dasharray:5 4;stroke-opacity:.6}.linelab{font-size:11px;fill:var(--mute);letter-spacing:.04em}
+.hb .blob{fill:#efe7d6;stroke:#cfc4ae;stroke-width:1}.hb.top .blob{fill:#f3e3dc;stroke:var(--seal)}.hb.headless .blob{fill:#f7e1dc;stroke:var(--broken);stroke-dasharray:4 3}
+.hlab{font-size:10.5px;fill:var(--ink);font-weight:600;cursor:pointer;paint-order:stroke;stroke:var(--paper);stroke-width:3px}
+.hm{cursor:pointer}.hm>circle:not(.ring){stroke:#fffdf8;stroke-width:1.5}.hm .ring{fill:none;stroke-width:2}.hm .ring.ego{stroke:var(--ink)}.hm .ring.head{stroke:var(--seal)}
+.hm .mn{font-size:7px;fill:var(--ink);display:none;pointer-events:none}svg.near .hm .mn{display:block}.hm.sel>circle:not(.ring){stroke:var(--seal);stroke-width:3}
+.lsp{fill:none;stroke:#cbc2b0;stroke-width:1.3}.lsp.trunk{stroke:var(--seal);stroke-width:3.5;stroke-opacity:.75}
+.ln{cursor:pointer}.ln text{font-size:11px;fill:var(--mute)}.ln.alive text{fill:var(--ink)}.ln text.sub{font-size:9px;fill:var(--mute)}
+.ln>circle:not(.ring){stroke:#fffdf8;stroke-width:1.5}.ln .ring{fill:none;stroke-width:2}.ln .ring.ego{stroke:var(--ink)}.ln .ring.head{stroke:var(--seal)}.ln.sel>circle:not(.ring){stroke:var(--seal);stroke-width:3}
+.lhead{font-size:15px;font-weight:600;fill:var(--seal)}.lsub{font-size:11px;fill:var(--mute)}
+.dring{fill:none;stroke:var(--line);stroke-width:1}.dring.zero{stroke:var(--seal);stroke-opacity:.35}
+.dlab{font-size:11px;fill:var(--mute);paint-order:stroke;stroke:var(--paper);stroke-width:4px}
+.wnode.inlaw circle.dot{stroke-dasharray:3 2}
+.grid{stroke:#e5ddcd;stroke-width:1}.axislab{font-size:11px;fill:var(--mute)}.nowline{stroke:var(--seal);stroke-dasharray:4 4;stroke-width:1}
+.lifesvg{display:block;margin:6px 12px;cursor:default}
+.lifesvg .band{fill:#2f6f9f;fill-opacity:.06}
+.lrow{cursor:pointer}.lrow .hit{fill:transparent}.lrow:hover .hit{fill:#00000008}.lrow.sel .hit{fill:#8c2f1b14}
+.lrow .life{fill-opacity:.75;stroke-width:1}.lrow .life.est{fill-opacity:.25;stroke-dasharray:3 2}.lrow .life.open{fill-opacity:.2;stroke:none}
+.lname{font-size:12px}.ghead{font-size:11px;letter-spacing:.06em;text-transform:uppercase;fill:var(--seal);font-weight:600}
+.cross{stroke:var(--ink);stroke-width:1;stroke-dasharray:2 3}.crosslab{font-size:11px;font-weight:600}
+.auth{padding:16px 18px}
+.astats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.tile{flex:1 1 170px;max-width:260px;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--card);position:relative;border-left:4px solid var(--line)}
+.tile b{display:block;font-size:24px;font-family:Georgia,serif;line-height:1.1}.tile span{font-size:12.5px;color:var(--mute)}
+.tile.warn{border-left-color:var(--strained)}.tile.bad{border-left-color:var(--broken)}.tile.ok{border-left-color:var(--kept)}.tile.ok b{color:var(--mute)}
+.tile[onclick]{cursor:pointer}.tile[onclick]:hover{border-color:var(--ink)}.tile i{position:absolute;right:10px;top:8px;color:var(--mute);font-style:normal}
+.topwrap{display:flex;justify-content:center}.topwrap .hcard{min-width:380px;max-width:760px}
+.trunk{height:18px;border-left:2px solid var(--line);margin-left:50%}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;border-top:2px solid var(--line);padding-top:14px}
+.hcard{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:10px 12px;border-top:4px solid #8d8473}
+.hcard.top{border-top-color:var(--seal)}.hcard.mine{box-shadow:0 0 0 2px var(--ink)}.hcard.gone{border-top-color:var(--strained)}
+.hcard.bad{border-top-color:var(--broken);background:#fbeeea;margin-top:14px}
+.hcard .hhead{margin-bottom:6px}.hcard .hsub{font-size:12px;color:var(--mute);margin-top:6px}
+.pchip.byright{border-color:var(--strained);background:#fbf0d6}.pchip.bound{border:1.5px dashed #2f6f9f}
+.pchip.picked{outline:2px solid var(--seal)}
+/* between circle */
+.bcircle{display:block;width:100%;margin:6px auto 10px}
+.bline{fill:none!important;cursor:pointer;stroke-opacity:.75}.bline:hover,.bline.on{stroke-opacity:1;filter:drop-shadow(0 0 2px #0004)}
+.bline.s-unset{stroke:#b9b0a0}
+td.cell.kept{background:#e9f2ec}td.cell.strained{background:#faf0dc}td.cell.broken{background:#f8e3df}td.cell.severed{background:#e2ddd6}
+.house>.couple .tog{border:0;background:none;cursor:pointer;color:var(--mute);font-size:12px;padding:0 4px}
+.house.shut>.kids{display:none}
+aside{width:440px;max-width:46vw;border-left:1px solid var(--line);background:var(--card);overflow:auto;padding:16px 18px}
+.page{flex:1;overflow:auto;padding:18px 22px}
+svg text{font-family:system-ui,"Noto Sans KR",sans-serif;pointer-events:none}
+.node{cursor:pointer}
+.node rect{fill:var(--card);stroke:#8d8473;stroke-width:1.2}
+.node.dead rect{fill:#ece6d9;stroke-dasharray:3 3}
+.node.ego rect{fill:var(--ink);stroke:var(--ink)}
+.node.ego text{fill:#fff}
+.node.sel rect{stroke:var(--seal);stroke-width:3}
+.node.st-entering rect{stroke:#2f6f9f;stroke-width:2.5;stroke-dasharray:6 4}
+.node.st-estranged rect{stroke:#c98a1b;stroke-width:2.5;fill:#fbf0d6}
+.node.st-outside rect{stroke:#8a8578;stroke-width:1.5;stroke-dasharray:2 3;fill:#f1efe9}
+.node.st-cut_off rect{fill:#1d1b19;stroke:#1d1b19}.node.st-cut_off text{fill:#fff}.node.st-cut_off .nm{text-decoration:line-through}
+.node .nm{font-size:13px;font-weight:600}
+.node .rl{font-size:11px;fill:var(--mute)}
+.node.ego .rl{fill:#d8cfbf}
+.edge{fill:none;stroke-width:1.6}
+.s-kept{stroke:var(--kept);fill:var(--kept)}.s-strained{stroke:var(--strained);fill:var(--strained)}
+.s-broken{stroke:var(--broken);fill:var(--broken)}.s-severed{stroke:var(--severed);fill:var(--severed)}
+.s-unset{stroke:var(--unset);fill:var(--unset)}
+.edge.s-severed{stroke-dasharray:2 5}.edge.s-broken{stroke-dasharray:7 4}
+.legend{display:flex;gap:12px;font-size:12px;color:var(--mute);align-items:center}
+.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:4px}
+aside h2{font-size:21px}
+.ko{font-family:"Noto Serif KR",serif;color:var(--seal)}
+html[lang^="zh"] .brand-zi{display:none}
+header #bgSel,header #langSel{font-size:13px;padding:4px 6px;max-width:132px;margin-left:6px}
+header .find input{width:190px}
+.about{font-size:15.5px;line-height:1.6}.about .lead{font-size:20px;font-weight:600}.about h3{margin:22px 0 4px}
+.about dl{margin:8px 0}.about dt{font-weight:600;margin-top:10px}.about dd{margin:2px 0 0 0}
+.rel{margin:6px 0 12px}
+.rel b{font-weight:600}
+.sect{margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
+.sect>h3{font-size:16px;margin-bottom:4px}
+.sphere{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:10px 0 3px}
+.duty{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px dotted var(--line)}
+.duty .t{flex:1}
+.duty .src{display:block;font-size:12px;color:var(--mute)}
+.duty.draft .t>span:first-child{font-style:italic;color:#5d564b}
+.tag{font-size:10px;border:1px solid var(--line);border-radius:3px;padding:0 4px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.tag.draft{border-style:dashed}.tag.confirmed{border-color:var(--kept);color:var(--kept)}.tag.retired{text-decoration:line-through}
+.marks{display:flex;gap:2px;flex:none}
+.marks button{width:24px;height:24px;border:1px solid var(--line);background:#fff;border-radius:4px;cursor:pointer;padding:0;color:var(--mute)}
+.marks button.on.kept{background:var(--kept);border-color:var(--kept);color:#fff}
+.marks button.on.failing{background:var(--broken);border-color:var(--broken);color:#fff}
+.marks button.on.poorly{background:var(--strained);border-color:var(--strained);color:#fff}
+.marks button.on.na{background:var(--unset);border-color:var(--unset);color:#fff}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
+.chip{border:1px solid var(--line);border-radius:999px;padding:2px 10px;cursor:pointer;background:#fff;font-size:13px}
+.chip.on{color:#fff}
+.chip.on.kept{background:var(--kept);border-color:var(--kept)}.chip.on.strained{background:var(--strained);border-color:var(--strained)}
+.chip.on.broken{background:var(--broken);border-color:var(--broken)}.chip.on.severed{background:var(--severed);border-color:var(--severed)}
+.note{width:100%;margin-top:4px;font-size:13px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+table{border-collapse:collapse}
+td,th{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top;font-size:13px}
+th{background:#efe8da;font-weight:600}
+td.cell{cursor:pointer;border-left:4px solid var(--unset)}
+td.cell.kept{border-left-color:var(--kept)}td.cell.strained{border-left-color:var(--strained)}
+td.cell.broken{border-left-color:var(--broken)}td.cell.severed{border-left-color:var(--severed)}
+.cols{display:flex;gap:22px;align-items:flex-start}
+.cols>div{flex:1;min-width:0}
+.grp{font-family:Georgia,serif;font-size:16px;margin:16px 0 4px}
+.hit{padding:8px 0;border-bottom:1px dotted var(--line);cursor:pointer}
+.hit b{display:block;font-size:13px}
+.hit mark{background:#f3dc9c}
+.hit .full{white-space:pre-wrap;font-size:13px;margin-top:6px;display:none}
+.hit.open .full{display:block}.hit.open .snip{display:none}
+.bar{height:10px;background:var(--line);border-radius:5px;overflow:hidden;display:flex;width:220px}
+.bar i{display:block;height:100%}
+dialog{border:1px solid var(--line);border-radius:10px;padding:18px 20px;width:560px;max-width:94vw;background:var(--card);color:var(--ink)}
+dialog::backdrop{background:#0005}
+dialog label{display:block;font-size:12px;color:var(--mute);margin-top:8px}
+dialog input[type=text],dialog select,dialog textarea{width:100%}
+.err{color:var(--broken);font-size:13px;min-height:18px}
+.st-entering{--st:#2f6f9f}.st-estranged{--st:#c98a1b}.st-cut_off{--st:#1d1b19}.st-outside{--st:#8a8578}
+.badge{font-size:10px;border-radius:3px;padding:0 5px;color:#fff;background:var(--st,#7a7265);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.wnode{cursor:pointer}
+.wnode circle.dot{fill:var(--card);stroke:#6f675a;stroke-width:1.5}
+.wnode.dead circle.dot{fill:#d9d0bf;stroke-dasharray:2 2}
+.wnode.st-outside circle.dot{fill:#f1efe9;stroke:#8a8578;stroke-dasharray:2 2}
+.pchip.st-outside{border:1px dashed #8a8578;opacity:.85}
+.wnode.st-entering circle.dot{fill:#fff;stroke:#2f6f9f;stroke-width:2.5;stroke-dasharray:4 3}
+.wnode.st-estranged circle.dot{fill:#f2d9a3;stroke:#c98a1b;stroke-width:2.5}
+.wnode.st-cut_off circle.dot{fill:#1d1b19;stroke:#1d1b19}
+.wnode.sel circle.dot{stroke:var(--seal);stroke-width:4}
+.wnode .nm{font-size:12px;font-weight:600}.wnode .rl{font-size:10.5px;fill:var(--mute)}
+.wnode.st-cut_off .nm{text-decoration:line-through}
+.spoke{stroke-width:2.6;fill:none;stroke-linecap:round}
+.ring{fill:none;stroke:var(--line);stroke-dasharray:2 6}
+.house{border:1px solid var(--line);border-radius:10px;margin:4px 0;padding:7px 9px;background:rgba(90,60,10,.035)}
+.house>.kids{margin:7px 0 0 20px}
+.couple{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.kids{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:flex-start}
+.kids>.house{flex-basis:100%}
+.pchip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #8d8473;border-radius:6px;padding:2px 8px;background:var(--card);cursor:pointer;line-height:1.25}
+.pchip.f{border-radius:14px}
+.pchip small{color:var(--mute);font-size:11px}
+.pchip.dead{background:#ece6d9;border-style:dotted;color:#6d665a}
+.pchip.st-entering{border:2px dashed #2f6f9f}
+.pchip.st-estranged{border:2px solid #c98a1b;background:#fbf0d6}
+.pchip.st-cut_off{background:#1d1b19;border-color:#1d1b19;color:#fff}
+.pchip.st-cut_off b{text-decoration:line-through}.pchip.st-cut_off small{color:#cfc7b8}
+.pchip.is-ego{outline:3px solid var(--seal);outline-offset:1px}
+.pchip i{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.wed{color:var(--mute);font-size:12px}
+details.dx>summary{list-style:none;cursor:pointer}details.dx>summary::-webkit-details-marker{display:none}
+details.dx>summary::before{content:"▸";display:inline-block;width:1em;color:var(--mute);transition:transform .12s}
+details.dx[open]>summary::before{transform:rotate(90deg)}
+details.dx>.src,details.dx>.prov,details.dx>.whynot{margin-left:1em}details.dx>.src{display:block;margin-top:3px}
+.prov{font-size:12.5px;margin-top:3px}.prov summary{cursor:pointer;color:var(--seal)}
+.prov div{margin:3px 0 3px 0}.prov q{display:block;color:var(--mute);font-style:italic;margin-left:8px}
+.prov .ptrad{margin:6px 0 4px 0}.prov .ptrad>div{margin:2px 0 2px 10px}.prov details summary{color:var(--mute);margin-left:10px;font-size:12px}
+.ruling .rsec{margin-top:12px}.ruling .rhead{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+.ruling .ground{margin:6px 0 10px}.ruling blockquote{margin:4px 0 0;padding:6px 10px;border-left:3px solid var(--seal);background:#f4efe6;font-family:Georgia,serif;font-size:14px}
+.ruling blockquote cite{display:block;font-family:system-ui,sans-serif;font-style:normal;font-size:12px;color:var(--mute);margin-top:4px}
+.stance{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;border-radius:3px;padding:0 5px;color:#fff;background:var(--kept)}.stance.against{background:var(--broken)}
+.verdict{text-transform:capitalize}.v-supported{color:var(--kept)}.v-partly-supported{color:var(--strained)}.v-unsupported{color:var(--mute)}.v-contradicted{color:var(--broken)}.v-set-aside{color:var(--broken)}.v-keep-in-part{color:var(--strained)}.v-keep{color:var(--kept)}
+.tag.accepted{border-color:var(--kept);color:var(--kept)}.tag.kept{border-color:var(--strained);color:var(--strained)}.tag.revise{border-color:var(--open,#2f6f9f);color:#2f6f9f}
+.whynot{font-size:12.5px;background:#f4efe6;border-left:3px solid var(--seal);padding:5px 8px;margin-top:5px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:2px 10px;cursor:pointer;font-size:13px}
+.seg button.on{background:var(--ink);color:#fff}
+#sheet{display:none}
+@media print{
+  header,main,dialog{display:none!important}
+  body{background:#fff;display:block}
+  #sheet{display:block;padding:0 6mm;font-size:11pt}
+  #sheet h1{font-size:20pt}#sheet h2{font-size:13pt;margin-top:12pt;border-bottom:1px solid #999}
+  #sheet .duty{break-inside:avoid}
+  #sheet table.charge{width:100%;border-collapse:collapse;margin-top:4pt}
+  #sheet table.charge th{text-align:left;font-size:9pt;font-weight:600;border-bottom:1px solid #333;padding:2pt 4pt}
+  #sheet table.charge td{vertical-align:top;border-bottom:1px solid #bbb;padding:4pt;font-size:10.5pt}
+  #sheet table.charge tr{break-inside:avoid}
+  #sheet td.notes{width:45%;height:15mm;background:repeating-linear-gradient(#fff 0 6.5mm,#ddd 6.5mm calc(6.5mm + 1px))}
+  #sheet .notebox{height:60mm;border:1px solid #999;margin-top:6pt;background:repeating-linear-gradient(#fff 0 7mm,#ddd 7mm calc(7mm + 1px))}
+  #sheet .small{font-size:9pt;color:#444}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1><b data-i18n data-i18n-key="The Way (name)" style="font-weight:inherit">The Way</b><span class="brand-zi">道</span></h1>
+  <nav id="nav">
+    <button data-tab="stand" class="on" data-i18n>Stand here</button>
+    <button data-tab="map" data-i18n>Family map</button>
+    <button data-tab="atlas" data-i18n>Atlas</button>
+    <button data-tab="between" data-i18n>Between</button>
+    <button data-tab="way" data-i18n>The Way</button>
+    <button data-tab="rulings" data-i18n>Rulings</button>
+    <button data-tab="clan" data-i18n>Clan</button>
+    <button data-tab="about" data-i18n>About</button>
+  </nav>
+  <span class="grow"></span>
+  <select id="bgSel" title="the family's background: which kinship terms appear beside the English" data-i18n-attr="title" onchange="setBackground(this.value)"></select>
+  <select id="langSel" title="Language" data-i18n-attr="title" onchange="setLang(this.value)"></select>
+  <div class="find"><input type="search" id="q" placeholder="Stand as… (type a name)" data-i18n-attr="placeholder" autocomplete="off"><div class="drop" id="qdrop" hidden></div></div>
+  <a class="btn" id="phoneBtn" href="/m" hidden title="the view made for phones" data-i18n data-i18n-attr="title">Phone view</a>
+  <button class="btn" id="meBtn" title="Stand as yourself" data-i18n data-i18n-attr="title">Me</button>
+  <button class="btn" onclick="personDialog(null)" data-i18n>+ Person</button>
+</header>
+
+<main id="tab-stand" class="on">
+  <div class="stage">
+    <div class="tools">
+      <span class="seg" title="how to draw the people around you" data-i18n-attr="title"><button id="v_web" onclick="setView('web')" title="a spoke to each relation" data-i18n data-i18n-attr="title">Web</button><button id="v_rings" onclick="setView('rings')" title="rings by degree of kinship" data-i18n data-i18n-attr="title">Degrees</button><button id="v_tree" onclick="setView('tree')" title="rows by generation" data-i18n data-i18n-attr="title">Tree</button><button id="v_fan" onclick="setView('fan')" title="ancestors above, descendants below" data-i18n data-i18n-attr="title">Fan</button><button id="v_duties" onclick="setView('duties')" title="what you owe each person, by sphere" data-i18n data-i18n-attr="title">Duties</button></span>
+      <button class="btn sm" id="reachBtn" onclick="toggleReach()">Wider</button>
+      <label class="mute" style="font-size:13px" id="deadBox"><input type="checkbox" id="showDead" checked onchange="draw()"> <span data-i18n>show the dead</span></label>
+      <span id="lensbar" class="row" style="gap:6px 10px"></span>
+    </div>
+    <div id="tree" class="canvas"></div>
+  </div>
+  <aside id="panel"></aside>
+</main>
+<main id="tab-map"><div class="page" id="map"></div></main>
+<main id="tab-atlas">
+  <div class="stage"><div class="tools" id="atools"></div><div id="atlas" class="canvas"></div></div>
+  <aside id="apanel"></aside>
+</main>
+<main id="tab-between"><div class="page" id="between"></div></main>
+<main id="tab-way"><div class="page" id="way"></div></main>
+<main id="tab-rulings"><div class="page" id="rulings"></div></main>
+<main id="tab-clan"><div class="page" id="clan"></div></main>
+<main id="tab-about"><div class="page" id="about" style="max-width:760px"></div></main>
+<dialog id="dlg"></dialog>
+<div id="sheet"></div>
+
+<script src="/static-api.js"></script>
+<script>
+/* Phones get /m. The server decides from the browser's name; this catches a small touch screen it missed.
+   Choosing "full site" on the phone view sets way_ui=full, and /full always shows this page. */
+(() => {
+  const touch = matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0, small = Math.min(screen.width, screen.height) < 600;
+  if (location.pathname === "/" && touch && small && !/(^|;\s*)way_ui=full/.test(document.cookie)) location.replace("/m" + location.hash);
+  if (touch) document.getElementById("phoneBtn").hidden = false;     // the header is already parsed
+})();
+</script>
+<script src="/i18n.js"></script>
+<script src="/about.js"></script>
+<script src="/maps.js"></script>
+<script>
+"use strict";
+let S = null, E = null, egoId = null, sel = null, reach = "close", examine = false;
+let recenter = true, view = localStorage.getItem("way-view") || "web", mapRoot = null, mapLiving = true;
+let betweenIds = [], betweenCell = null, betweenAuto = null, betweenCleared = false, wayFilter = {from: "", trad: "", status: "", text: ""}, libQ = "", libHits = [];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const P = id => S.people[id];
+const nm = id => P(id) ? P(id).name : "?";
+const yr = p => (p.birth || "").slice(0, 4);
+const life = p => (yr(p) || p.death) ? `${yr(p) || "?"}–${p.death ? (p.death === "?" ? "" : p.death.slice(0, 4)) : ""}` : "";
+/* where a duty is recorded: its own tradition first, then every attestation */
+const recorded = d => [{tradition: d.tradition, citation: d.citation}, ...(d.attest || [])];
+const tradsOf = d => [...new Set(recorded(d).map(a => a.tradition))];
+const alsoIn = d => { const ts = tradsOf(d).filter(x => x !== d.tradition); return ts.length ? ` · <span title="${esc((d.attest || []).map(a => t(S.meta.traditions[a.tradition] || a.tradition) + ": " + a.citation).join("\n"))}">${t("also {list}", {list: ts.map(x => esc(t(S.meta.traditions[x] || x))).join(", ")})}</span>` : ""; };
+function provenance(d) {            // every place the duty is recorded, each with its words
+  if (!(d.attest || []).length) return "";
+  const order = Object.keys(S.meta.traditions), rank = x => order.includes(x) ? order.indexOf(x) : 99;
+  const by = {};
+  recorded(d).forEach(a => (by[a.tradition] = by[a.tradition] || []).push(a));
+  const one = a => `<div>${esc(a.citation)}${a.quote ? `<q>${esc(a.quote)}</q>` : ""}</div>`;
+  const n = recorded(d).length, ts = Object.keys(by).sort((a, b) => rank(a) - rank(b));
+  return `<div class="prov"><div class="mute">${ts.length > 1 ? t("Recorded in {n} traditions", {n: ts.length}) : t("Recorded in {n} tradition", {n: ts.length})}${n > ts.length ? ` · ${t("{n} places", {n})}` : ""}</div>${ts.map(tr =>   // weightiest first
+    `<div class="ptrad"><b>${esc(t(S.meta.traditions[tr] || tr))}</b>${by[tr].length > 1 ? ` (${by[tr].length})` : ""}${by[tr].slice(0, 3).map(one).join("")}${by[tr].length > 3
+      ? `<details><summary>${t("{n} more", {n: by[tr].length - 3})}</summary>${by[tr].slice(3).map(one).join("")}</details>` : ""}</div>`).join("")}</div>`;
+}
+/* a duty shows only its words; the arrow opens where it comes from */
+const dutyText = (d, src) => `<details class="dx"><summary>${esc(dtext(d))}</summary><div class="src">${src}</div>${provenance(d)}${d.status === "retired" ? whyNot(d) : ""}</details>`;
+const whyNot = d => d.reason || d.counter ? `<div class="whynot"><b>${t("Why we do not keep this.")}</b> ${esc(d.reason)}${d.counter ? `<div class="mute" style="margin-top:3px">${t("Against it: {text}", {text: esc(d.counter)})}</div>` : ""}</div>` : "";
+const markLabel = s => s === "poorly" ? t("not doing well") : s === "na" ? t("does not apply") : s === "kept" ? t("kept") : s === "failing" ? t("failing") : s;
+const dead = p => p.living === undefined ? !!p.death : !p.living;   // the server decides who is living
+
+const READONLY_MSG = () => t("This is a read-only demonstration of The Way with an example family. Download it to keep your own family's record.");
+window.alert = (a => m => { if (m !== "read-only") a(m); })(window.alert.bind(window));   // the refusal is said once
+window.addEventListener("unhandledrejection", e => { if (e.reason && e.reason.message === "read-only") e.preventDefault(); });
+async function api(method, path, body) {
+  if (method !== "GET" && typeof S !== "undefined" && S && S.read_only) { alert(READONLY_MSG()); throw new Error("read-only"); }
+  const r = await fetch(path, {method, headers: body ? {"Content-Type": "application/json"} : {}, body: body ? JSON.stringify(body) : undefined});
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+async function loadState() {
+  const s = await api("GET", "/api/state");
+  s.people = Object.fromEntries(s.people.map(p => [p.id, p]));
+  s.duties = Object.fromEntries(s.duties.map(d => [d.id, {...d, attest: []}]));
+  for (const a of s.attest || []) if (s.duties[a.duty_id]) s.duties[a.duty_id].attest.push(a);
+  S = s;
+  chrome();
+}
+function chrome() {                 // the header's selects and the banners, in the reader's language
+  document.title = t("The Way");
+  const bs = document.getElementById("bgSel");
+  if (bs) bs.innerHTML = Object.entries(S.backgrounds || {}).map(([k, v]) => `<option value="${k}"${k === S.background ? " selected" : ""}>${t(v)}</option>`).join("");
+  const ls = document.getElementById("langSel");
+  if (ls) ls.innerHTML = langOptions();
+  const ex = document.getElementById("ex-banner");
+  if (S.mode === "example" && !ex) document.body.insertAdjacentHTML("afterbegin", `<div id="ex-banner" style="background:#f3ead7;border-bottom:1px solid #d9c9a3;text-align:center;padding:6px 12px;font-size:13px">
+    ${t("An example family. Switch the background at the top to see a Korean, Chinese or Anglo family, or a mix.")}${S.read_only ? "" : ` <button class="btn sm" onclick="startOwn()">${t("Start your own family")}</button>`}</div>`);
+  if (S.mode !== "example" && ex) ex.remove();
+  if (S.read_only && !document.getElementById("ro-banner")) document.body.insertAdjacentHTML("afterbegin",
+    `<div id="ro-banner" style="background:#7a2a1a;color:#fff;text-align:center;padding:6px 12px;font-size:13px">${t("Read-only demonstration with an example family. Nothing here can be changed.")}</div>`);
+}
+async function loadEgo() {
+  if (egoId == null || !P(egoId)) { E = null; return; }
+  E = await api("GET", "/api/ego/" + egoId);
+}
+/* the family's background: in the examples it picks which example family is shown; in a family's own record it is a setting */
+async function setBackground(bg) {
+  if (S.mode === "example") { document.cookie = "way_bg=" + bg + "; path=/; max-age=31536000; samesite=lax"; egoId = null; E = null; sel = null; localStorage.removeItem("way-ego"); history.replaceState(null, "", location.pathname); await loadState(); await fromHash(); return; }
+  try { await api("PUT", "/api/setting", {key: "background", value: bg}); await refresh(); } catch (e) { alert(e.message); }
+}
+async function startOwn() {
+  if (!confirm(t("Start your own family's record? It begins empty; add yourself first with + Person, then your parents, spouse and children. The example families stay out of it."))) return;
+  try { await api("POST", "/api/own", {background: S.background}); egoId = null; E = null; sel = null; localStorage.removeItem("way-ego"); history.replaceState(null, "", location.pathname); await loadState(); await fromHash(); } catch (e) { alert(e.message); }
+}
+async function refresh() { await loadState(); await loadEgo(); render(); }
+async function standAs(id) {
+  egoId = id; sel = null; examine = false; recenter = true;
+  localStorage.setItem("way-ego", id);
+  await loadEgo(); showTab("stand"); render();
+}
+function render() {
+  const tab = document.querySelector("nav button.on").dataset.tab;
+  if (tab === "stand") { draw(); panel(); }
+  if (tab === "map") drawMap();
+  if (tab === "atlas") drawAtlas();
+  if (tab === "between") drawBetween();
+  if (tab === "way") drawWay();
+  if (tab === "rulings") drawRulings();
+  if (tab === "clan") drawClan();
+  if (tab === "about") $("#about").innerHTML = `<div class="card">${aboutHTML()}</div>`;
+  syncHash();
+}
+function syncHash() {              // keep the address a deep link to what is on screen
+  const tab = document.querySelector("nav button.on").dataset.tab, h = new URLSearchParams();
+  if (egoId != null) h.set("ego", egoId);
+  if (tab !== "stand") h.set("tab", tab);
+  if (tab === "stand") { if (sel) h.set("sel", sel); if (view !== "web") h.set("view", view); if (reach === "wide") h.set("reach", "wide"); }
+  if (tab === "atlas") { h.set("av", atlasView); if (atlasSel != null) h.set("sel", atlasSel); }
+  const s = "#" + h.toString();
+  if (location.hash !== s) history.replaceState(null, "", s);
+}
+function showTab(t) {
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  document.querySelectorAll("main").forEach(m => m.classList.toggle("on", m.id === "tab-" + t));
+}
+$("#nav").onclick = e => { if (e.target.dataset.tab) { showTab(e.target.dataset.tab); render(); } };
+
+/* ---------- people search ---------- */
+function matches(text, limit = 14) {
+  const t = text.trim().toLowerCase();
+  if (!t) return [];
+  return Object.values(S.people).filter(p => (p.name + " " + (p.ko_name || "")).toLowerCase().includes(t))
+    .sort((a, b) => (dead(a) - dead(b)) || a.name.localeCompare(b.name)).slice(0, limit);
+}
+function attachFinder(input, drop, onPick) {
+  const show = () => {
+    const m = matches(input.value);
+    drop.hidden = !m.length;
+    drop.innerHTML = m.map(p => `<div data-id="${p.id}"><span>${esc(p.name)}</span><small>${esc(life(p))}</small></div>`).join("");
+  };
+  input.oninput = show; input.onfocus = show;
+  drop.onmousedown = e => {
+    const d = e.target.closest("[data-id]");
+    if (d) { e.preventDefault(); input.value = ""; drop.hidden = true; onPick(+d.dataset.id); }
+  };
+  input.onblur = () => setTimeout(() => drop.hidden = true, 150);
+}
+attachFinder($("#q"), $("#qdrop"), standAs);
+$("#meBtn").onclick = () => S.me && P(S.me) ? standAs(S.me) : alert(t("Stand as yourself first, then press “This is me” in the side panel."));
+
+/* ---------- stand-here tree ---------- */
+const CLOSE = new Set(["P", "PP", "S", "PC", "C", "CC", "CS", "SP", "PS", "SC", "X", "K", "Q", "PSC"]);
+const WIDE = new Set([...CLOSE, "PPC", "PPCS", "PPCC", "PCS", "PCC", "PCCS", "SPC", "SPCS", "SPCC", "PPP", "CCC", "CCS", "SPP", "CSP"]);
+const SEV = {kept: 1, strained: 2, broken: 3, severed: 4};
+function toggleReach() { reach = reach === "close" ? "wide" : "close"; $("#reachBtn").textContent = reach === "close" ? t("Wider") : t("Closer"); recenter = true; draw(); if (!sel) panel(); }
+function shown() {
+  const set = reach === "close" ? CLOSE : WIDE, showDead = $("#showDead").checked, out = [];
+  for (const [id, r] of Object.entries(E.rels)) {
+    if (!set.has(r.them.path)) continue;
+    if (!showDead && dead(P(id))) continue;
+    out.push(+id);
+  }
+  return out;
+}
+function rank(id) {
+  const r = E.rels[id].them, p = r.path, mat = (r.qual || "").startsWith("mat"), f = P(id).sex === "f";
+  if (p === "P") return f ? 4 : 3;
+  if (p === "PP" || p === "PPP") return mat ? 6 : 1;
+  if (p === "PPC") return mat ? 6.5 : 1;
+  if (p === "PPCC") return mat ? 9 : 0;
+  return ({PS: 5, SP: 8, SPP: 9, CSP: 9.5, PC: 2, PSC: 2.5, S: 5, X: 5.5, K: 5.6, Q: 5.7, SPC: 7, C: 3, SC: 4, PCC: 1, SPCC: 6, CC: 3, CCC: 3})[p] ?? 10;
+}
+function bondBetween(a, b) {
+  let worst = null;
+  for (const x of E.bonds) if ((x.a === a && x.b === b) || (x.a === b && x.b === a)) if (!worst || SEV[x.state] > SEV[worst]) worst = x.state;
+  return worst || "unset";
+}
+function layout(ids, W, H, GAPX, GAPY) {
+  const rows = {};
+  const isSpouseNode = id => { const p = E.rels[id].them.path; return p.endsWith("S"); };
+  for (const id of ids) (rows[E.rels[id].them.gen] ||= []).push(id);
+  (rows[0] ||= []).push(egoId);
+  const pos = {}, gens = Object.keys(rows).map(Number).sort((a, b) => b - a);
+  let maxN = 1;
+  for (const g of gens) {
+    const key = id => id === egoId ? [2, P(id).birth || "9999"] : [rank(id), P(id).birth || "9999"];
+    const base = rows[g].filter(id => id === egoId || !isSpouseNode(id)).sort((a, b) => { const x = key(a), y = key(b); return x[0] - y[0] || x[1].localeCompare(y[1]) || a - b; });
+    for (const id of rows[g].filter(id => id !== egoId && isSpouseNode(id))) {
+      const i = base.indexOf(E.rels[id].via);
+      if (i >= 0) base.splice(i + 1, 0, id); else base.push(id);
+    }
+    rows[g] = base; maxN = Math.max(maxN, base.length);
+  }
+  const width = Math.max(maxN * (W + GAPX) + GAPX, 700);
+  gens.forEach((g, ri) => rows[g].forEach((id, i) => {
+    pos[id] = {x: width / 2 + (i - (rows[g].length - 1) / 2) * (W + GAPX) - W / 2, y: 20 + ri * (H + GAPY)};
+  }));
+  return {pos, width, height: 40 + gens.length * (H + GAPY) - GAPY};
+}
+function edges(pos, W, H) {
+  let s = "";
+  for (const u of S.unions) {
+    const a = pos[u.a_id], b = pos[u.b_id];
+    if (!a || !b) continue;
+    const [l, r] = a.x < b.x ? [a, b] : [b, a];
+    const cls = "edge s-" + bondBetween(u.a_id, u.b_id), dash = u.status === "divorced" ? ' stroke-dasharray="2 4"' : "";
+    if (l.y === r.y) s += `<path class="${cls}"${dash} style="fill:none" d="M${l.x + W} ${l.y + H / 2 - 3}H${r.x}M${l.x + W} ${l.y + H / 2 + 3}H${r.x}"/>`;
+    else s += `<path class="${cls}"${dash} style="fill:none" d="M${l.x + W / 2} ${l.y + H}L${r.x + W / 2} ${r.y}"/>`;
+  }
+  const kids = {};
+  for (const k of S.links) if (pos[k.parent_id] && pos[k.child_id]) (kids[k.child_id] ||= []).push(k.parent_id);
+  for (const [c, ps] of Object.entries(kids)) {
+    const b = pos[c], x2 = b.x + W / 2, y2 = b.y;
+    const pair = ps.length === 2 && pos[ps[0]].y === pos[ps[1]].y && Math.abs(pos[ps[0]].x - pos[ps[1]].x) < 2.5 * W;
+    const from = pair ? [{x: (pos[ps[0]].x + pos[ps[1]].x + W) / 2, y: pos[ps[0]].y + H / 2 + 3, st: [bondBetween(ps[0], +c), bondBetween(ps[1], +c)].sort((p, q) => (SEV[q] || 0) - (SEV[p] || 0))[0]}]
+      : ps.map(p => ({x: pos[p].x + W / 2, y: pos[p].y + H, st: bondBetween(p, +c)}));
+    for (const f of from) { const m = (Math.max(f.y, pos[ps[0]].y + H) + y2) / 2;
+      s += `<path class="edge s-${f.st}" style="fill:none" d="M${f.x} ${f.y}V${m}H${x2}V${y2}"/>`; }
+  }
+  return s;
+}
+const clip = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
+const VIEWS = ["web", "rings", "tree", "fan", "duties"];
+function setView(v) { view = v; localStorage.setItem("way-view", v); recenter = true; draw(); syncHash(); }
+function draw() {
+  if (!VIEWS.includes(view)) view = "web";
+  for (const v of VIEWS) $("#v_" + v).classList.toggle("on", view === v);
+  const box = $("#tree");
+  box.classList.toggle("scroll", view === "duties");
+  $("#reachBtn").hidden = $("#deadBox").hidden = view === "fan";
+  $("#reachBtn").textContent = reach === "close" ? t("Wider") : t("Closer");
+  if (!E) { box.innerHTML = welcome(); $("#lensbar").innerHTML = ""; return; }
+  const ids = view === "web" ? drawRadial() : view === "rings" ? drawRadial(true) : view === "tree" ? drawTree() : view === "fan" ? drawFan() : drawDuties();
+  $("#lensbar").innerHTML = view === "duties" ? "" : lensControls(ids || [], "stand") + (view === "rings" ? `<div class="mute" style="font-size:12px;margin-top:4px">${t("Each ring is a degree of kinship: one for every step up to a common ancestor and down again. A husband or wife has no degree and sits beside you. In-laws (dashed) take the degree of the one through whom they come.")}</div>` : "");
+}
+const standing = p => (p.standing && p.standing !== "member") ? p.standing : "";
+const theHead = () => (E && E.head) || S.head;
+const ofFamily = id => (S.familySet ||= new Set(S.family || [])).has(id);   // under the Head's authority (the server decides)
+const isHouseHead = id => S.heads[id] === id && ofFamily(id);
+const shared = id => Object.values(S.people).some(x => x.id !== id && x.name === nm(id) && !dead(x));
+const who = id => `<a href="#" onclick="standAs(${id});return false">${esc(nm(id))}</a>${shared(id) && yr(P(id)) ? ` <span class="mute">${t("(b. {year})", {year: yr(P(id))})}</span>` : ""}`;
+const gone = id => P(id) && P(id).headship ? ` <span class="badge st-estranged">${esc(t(S.meta.headship[P(id).headship]))}</span>` : "";
+function headLine(id) {              // who this person answers to, who acts, who carries them
+  const p = P(id), h = S.heads[id], right = id in S.heads_right ? S.heads_right[id] : h, top = theHead(), bits = [];
+  if (dead(p)) return "";
+  if (id === top) bits.push(`<b>${t("Head of the family")}</b>`);
+  if (p.headship) bits.push(`${t("{name} {state}", {name: esc(nm(id)), state: esc(t(S.meta.headship[p.headship]))})}${p.headship_date ? " (" + esc(p.headship_date) + ")" : ""}${right === id ? "; " + t("he still owes his house what he left") : ""}`);
+  const b = S.bound[id], his = p.sex === "m";
+  const boundBy = b => `<b>${t("acting head, bound by kinship: {who}", {who: who(b.by)})}</b> <span class="mute">${b.by === b.via ? t("(nearest kinsman, {rel})", {rel: esc(b.via_en.split(" (")[0])})
+    : his ? t("(head of the house of {name}, his {rel})", {name: esc(nm(b.via)), rel: esc(b.via_en.split(" (")[0])}) : t("(head of the house of {name}, her {rel})", {name: esc(nm(b.via)), rel: esc(b.via_en.split(" (")[0])})}</span>`;
+  const headless = `<b>${t("headless house")}</b>`;
+  if (right === id && h === id) bits.push(t("head of his own house"));
+  else if (b && right != null && right !== id) bits.push(`${his ? t("by right under {who}; no man of his own line acts", {who: who(right) + gone(right)}) : t("by right under {who}; no man of her own line acts", {who: who(right) + gone(right)})} · ${boundBy(b)}`);
+  else if (b) bits.push(`${his ? t("{headless}: no man left in his own line", {headless}) : t("{headless}: no man left in her own line", {headless})} · ${boundBy(b)}`);
+  else if (right != null && right !== id && right !== h) bits.push(t("by right under {who}; {acting}", {who: who(right) + gone(right), acting: `<b>${t("acting head: {who}", {who: h != null ? who(h) : t("none, so the Head of the family")})}</b>`}));
+  else if (h != null && h !== id) bits.push(t("under the headship of {who}", {who: who(h)}));
+  else if (h == null) bits.push(t("{headless} and no kinsman bound to it: under the Head of the family", {headless}));
+  if (p.carried_by && P(p.carried_by)) bits.push(`${t("carried by {who}", {who: who(p.carried_by)})}${p.carried_note ? " (" + esc(p.carried_note) + ")" : ""}`);
+  const actsFor = Object.keys(S.bound).filter(k => S.bound[k].by === id).map(Number);
+  if (actsFor.length) bits.push(t("bound by kinship to act as head for {list}", {list: actsFor.map(who).join(", ")}));
+  const carries = Object.values(S.people).filter(x => x.carried_by === id && !dead(x));
+  if (carries.length) bits.push(t("carries {list}", {list: carries.map(x => who(x.id)).join(", ")}));
+  if (top != null && id !== top && h !== top) bits.push(t("Head of the family: {who}", {who: who(top)}));
+  return `<div style="font-size:13px;margin:4px 0">${bits.join(" · ")}</div>`;
+}
+function headshipBox(p) {           // a living man may step down from, or abandon, his headship
+  if (p.sex !== "m" || dead(p)) return "";
+  const h = p.headship || "";
+  return `<div class="row ${h ? "st-estranged" : ""}" style="margin:8px 0;gap:6px"><span class="mute" style="font-size:12px">${t("Headship")}</span>
+    <select onchange="setStanding(${p.id},{headship:this.value})">${Object.entries(S.meta.headship).map(([k, v]) => `<option value="${k}"${h === k ? " selected" : ""}>${esc(t(v))}</option>`).join("")}</select>
+    ${h ? `<input type="text" style="width:104px" placeholder="${t("since (date)")}" value="${esc(p.headship_date || "")}" onchange="setStanding(${p.id},{headship_date:this.value})">
+    <input type="text" class="note" placeholder="${t("what happened")}" value="${esc(p.headship_note || "")}" onchange="setStanding(${p.id},{headship_note:this.value})">` : ""}</div>`;
+}
+function succession(list, title) {   // [{id, why?, holds}] -> ordered list, the first who holds marked acting
+  const act = (list.find(x => x.holds) || {}).id;
+  return `<details class="sect"><summary><b>${esc(title)}</b>${act != null ? ` · ${t("acting: {name}", {name: esc(nm(act))})}` : ""}</summary><ol style="margin:6px 0;padding-left:22px;font-size:13px">${list.map(x =>
+    `<li>${who(x.id)}${x.why ? ` <span class="mute">${esc(whyText(x.why))}</span>` : ""}${x.id === act ? ` <b style="color:var(--seal)">${t("acting")}</b>` : ""}${gone(x.id)}</li>`).join("") || `<li class="mute">${t("no man in line: directly under the Head of the family")}</li>`}</ol></details>`;
+}
+const stBadge = p => standing(p) ? `<span class="badge st-${standing(p)}">${esc(t(S.meta.standings[standing(p)]))}</span>` : "";
+function egoBond(id) { const r = E.rels[id]; if (!r) return "unset";
+  const a = r.bond_out ? r.bond_out.state : null, b = r.bond_in ? r.bond_in.state : null;
+  return [a, b].filter(Boolean).sort((x, y) => SEV[y] - SEV[x])[0] || "unset"; }
+/* The web: the person in the center, one spoke out to each relationship. People reached through
+   someone (a brother's wife, a son's child) sit further out on that person's spoke, so no lines cross. */
+/* degree of kinship (촌수): steps up to the common ancestor and down again; a spouse none; in-laws take the degree of the
+   one through whom they come. Former spouses, paramours and the other parent of a child have none (null). */
+const kinDegree = path => /^[XKQ]$/.test(path) ? null : (path.match(/[PC]/g) || []).length;
+const degreeName = n => [t("degree {n}", {n}), ...((S.native_langs) || ["ko"]).filter(l => l === "ko" ? LANG !== "ko" : !LANG.startsWith("zh")).map(l => l === "ko" ? n + "촌" : n + (zhScript() === "hant" ? "親等" : "亲等"))].join(" · ");
+function drawRadial(byDegree) {
+  const box = $("#tree"), ids = shown(), inSet = new Set(ids), kids = {}, depth = {};
+  const parentOf = id => { const p = E.rels[id].them.path;
+    if (p === "PC" || p === "PSC" || p === "X" || p === "K") return egoId;
+    // a sibling hangs off the one whose sibling they are, as yours do off you: a wife's brother beside her parents, not beyond them
+    if (p.endsWith("PC") || p.endsWith("PSC")) { const sib = E.rels[E.rels[id].via] && E.rels[E.rels[id].via].via; if (inSet.has(sib)) return sib; }
+    let v = E.rels[id].via;
+    while (v !== egoId && !inSet.has(v)) v = E.rels[v] ? E.rels[v].via : egoId;
+    return v; };
+  for (const id of ids) (kids[parentOf(id)] ||= []).push(id);
+  const first = id => { const p = E.rels[id].them.path; return p === "P" ? (P(id).sex === "f" ? 1 : 0) : ({S: 2, X: 3, K: 3.5, C: 4, PC: 6, PSC: 6.5})[p] ?? 5; };
+  const order = (a, b) => first(a) - first(b) || (P(a).birth || "9999").localeCompare(P(b).birth || "9999") || a - b;
+  const leaves = {}, count = id => leaves[id] = (kids[id] || []).sort(order).reduce((n, k) => n + count(k), 0) || 1;
+  count(egoId);
+  let maxD = 1; const setD = (id, d) => { depth[id] = d; maxD = Math.max(maxD, d); (kids[id] || []).forEach(k => setD(k, d + 1)); };
+  setD(egoId, 0);
+  const R1 = Math.max(185, leaves[egoId] * 30 / (2 * Math.PI)), STEP = 150, rad = d => d ? R1 + (d - 1) * STEP : 0;
+  const DSTEP = 120, degs = {}; let maxDeg = 0;
+  if (byDegree) for (const id of ids) { degs[id] = kinDegree(E.rels[id].them.path); if (degs[id] != null) maxDeg = Math.max(maxDeg, degs[id]); }
+  const ringR = d => d === 0 ? 100 : R1 + ((d ?? maxDeg + 1) - 1) * DSTEP;
+  const radius = id => id === egoId ? 0 : byDegree ? ringR(degs[id]) : rad(depth[id]);
+  const pos = {}, parents = (kids[egoId] || []).filter(k => E.rels[k].them.path === "P").reduce((n, k) => n + leaves[k], 0);
+  const unit = 2 * Math.PI / leaves[egoId];
+  const place = (id, a0) => { const span = leaves[id] * unit, a = a0 + span / 2;
+    pos[id] = {a, x: radius(id) * Math.cos(a), y: radius(id) * Math.sin(a)};
+    let c = a0; for (const k of kids[id] || []) { place(k, c); c += leaves[k] * unit; } };
+  let c = -Math.PI / 2 - parents * unit / 2;              // parents sit at the top
+  for (const k of kids[egoId] || []) { place(k, c); c += leaves[k] * unit; }
+  pos[egoId] = {x: 0, y: 0, a: 0};
+  const outer = byDegree ? Math.max(...ids.map(radius), R1) : rad(maxD);
+  const PAD = 190, half = outer + PAD, size = 2 * half;
+  let s = `<svg viewBox="${-half} ${-half} ${size} ${size}">`;
+  if (!byDegree) for (let d = 1; d <= maxD; d++) s += `<circle class="ring" r="${rad(d)}"/>`;
+  else { const present = [...new Set(Object.values(degs).map(d => d ?? -1))].sort((a, b) => a - b);
+    for (const d of present) { const r = ringR(d < 0 ? null : d), lab = d < 0 ? t("no degree") : d === 0 ? t("husband or wife: no degree") : degreeName(d);
+      // the label sits in the widest empty stretch of its ring
+      const as = ids.filter(i => radius(i) <= r + 1 && (degs[i] ?? -1) >= (d < 0 ? -1 : d) - 1).map(i => ((pos[i].a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)).sort((a, b) => a - b);
+      let la = -Math.PI / 2;
+      if (as.length) { let gap = -1; as.forEach((a, i) => { const nx = i + 1 < as.length ? as[i + 1] : as[0] + 2 * Math.PI; if (nx - a > gap) { gap = nx - a; la = (a + nx) / 2; } }); }
+      s += `<circle class="dring${d === 0 ? " zero" : ""}" r="${r}"/><text class="dlab" x="${(r * Math.cos(la)).toFixed(1)}" y="${(r * Math.sin(la) + 4).toFixed(1)}" text-anchor="middle">${esc(lab)}</text>`; } }
+  const pt = (r, a) => `${(r * Math.cos(a)).toFixed(1)} ${(r * Math.sin(a)).toFixed(1)}`;
+  const bondLens = lensKey() === "bond";
+  for (const id of ids) { const par = parentOf(id), p = pos[id], q = pos[par], rc = radius(id), rp = radius(par), rm = (rc + rp) / 2;
+    // outer spokes bend within their own band between two rings, so they never cut across another branch
+    const d = par === egoId ? `M0 0L${pt(rc, p.a)}` : `M${pt(rp, q.a)}C${pt(rm, q.a)} ${pt(rm, p.a)} ${pt(rc, p.a)}`;
+    s += `<path class="spoke${bondLens ? " s-" + egoBond(id) : ""}${faded(id) ? " faded" : ""}" data-id="${id}" style="fill:none;stroke:${lensColor(id)}" d="${d}"/>`; }
+  for (const id of ids) {
+    const p = P(id), q = pos[id], r = E.rels[id], inner = !!(kids[id] || []).length && !(byDegree && degs[id] === 0), right = Math.cos(q.a) >= 0;
+    const deg = q.a * 180 / Math.PI + (right ? 0 : 180), out = inner ? -1 : 1, dir = (right ? 1 : -1) * out;
+    const anchor = dir > 0 ? "start" : "end", rel = [clip(r.them.en.split(" (")[0], 20), native(r.them).split(" (")[0]].filter(Boolean).join(" · ");
+    s += `<g class="wnode${dead(p) ? " dead" : ""}${byDegree && /[SXKQ]/.test(r.them.path) && r.them.path !== "S" ? " inlaw" : ""}${standing(p) ? " st-" + standing(p) : ""}${sel === id ? " sel" : ""}${faded(id) ? " faded" : ""}" data-id="${id}" data-up="${parentOf(id)}" transform="translate(${q.x.toFixed(1)},${q.y.toFixed(1)})">
+      <title>${esc(p.name)} ${esc(life(p))} — ${esc(r.them.en)}${id === theHead() ? " — " + t("Head of the family") : isHouseHead(id) ? " — " + t("head of his house") : ""}${standing(p) ? " — " + esc(t(S.meta.standings[standing(p)])) : ""}${p.headship ? " — " + esc(t(S.meta.headship[p.headship])) : ""}</title>
+      <circle r="17" fill="transparent"/>${id === theHead() ? `<circle r="14" fill="none" stroke="var(--seal)" stroke-width="2"/>` : ""}<circle class="dot" r="${p.sex === "f" ? 9 : 8}"${standing(p) ? "" : ` style="stroke:${lensColor(id)};stroke-width:2.2"`}/>
+      ${standing(p) === "cut_off" ? `<path d="M-4 -4L4 4M4 -4L-4 4" stroke="#fff" stroke-width="1.6"/>` : ""}
+      <g transform="rotate(${deg.toFixed(1)})"><text class="nm" x="${dir * 15}" y="${inner ? -6 : -1}" text-anchor="${anchor}">${esc(clip(p.name, inner ? 16 : 22))}</text>
+      <text class="rl" x="${dir * 15}" y="${inner ? 14 : 11}" text-anchor="${anchor}">${esc(inner ? clip(rel, 18) : rel)}</text></g></g>`;
+  }
+  const e = E.ego, w = e.name.split(" "), l1 = w.length > 1 ? w.slice(0, -1).join(" ") : e.name, l2 = w.length > 1 ? w[w.length - 1] : "";
+  s += `<g class="wnode" data-id="${egoId}"><circle r="46" fill="var(--ink)"/>
+    <text x="0" y="${l2 ? -9 : -2}" text-anchor="middle" fill="#fff" style="font-size:12.5px;font-weight:600">${esc(clip(l1, 12))}</text>
+    ${l2 ? `<text x="0" y="6" text-anchor="middle" fill="#fff" style="font-size:12.5px;font-weight:600">${esc(clip(l2, 12))}</text>` : ""}
+    <text x="0" y="${l2 ? 22 : 14}" text-anchor="middle" fill="#d8cfbf" style="font-size:9.5px">${esc(clip(standing(e) ? t(S.meta.standings[standing(e)]) : egoId === theHead() ? t("Head of the family") : life(e), 18))}</text>${egoId === theHead() ? `<circle r="51" fill="none" stroke="var(--seal)" stroke-width="3"/>` : ""}</g></svg>`;
+  box.innerHTML = s;
+  zoomable(box, (byDegree ? "rings" : "web") + egoId + reach, {x: -half + PAD - 150, y: -half + PAD - 150, w: 2 * (half - PAD + 150), h: 2 * (half - PAD + 150)}, recenter, {x: 0, y: 0});
+  recenter = false;
+  const svg = box.querySelector("svg");
+  box.querySelectorAll(".wnode").forEach(n => {
+    n.onclick = () => { const id = +n.dataset.id; sel = id === egoId ? null : id; examine = false; draw(); panel(); syncHash(); };
+    n.ondblclick = () => standAs(+n.dataset.id);
+    if (+n.dataset.id === egoId) return;
+    n.onmouseenter = () => {       // light up the chain of kin from the center to this person
+      svg.classList.add("focus");
+      for (let v = +n.dataset.id, i = 0; v !== egoId && i < 12; i++) {
+        svg.querySelectorAll(`[data-id="${v}"]`).forEach(el => el.classList.add("hi"));
+        const up = svg.querySelector(`.wnode[data-id="${v}"]`); v = up ? +up.dataset.up : egoId;
+      }
+      svg.querySelector(`.wnode[data-id="${egoId}"]`).classList.add("hi");
+    };
+    n.onmouseleave = () => { svg.classList.remove("focus"); svg.querySelectorAll(".hi").forEach(el => el.classList.remove("hi")); };
+  });
+  return ids;
+}
+function drawTree() {
+  const box = $("#tree");
+  if (!E) { box.innerHTML = welcome(); return; }
+  const W = 148, H = 46, ids = shown(), L = layout(ids, W, H, 18, 62);
+  let s = `<svg viewBox="0 0 ${L.width} ${L.height}">` + edges(L.pos, W, H);
+  for (const id of [...ids, egoId]) {
+    const p = P(id), q = L.pos[id], r = E.rels[id], ego = id === egoId;
+    const ko = ego ? "" : native(r.them).split(" (")[0];
+    const sub = ego ? life(p) : [clip(r.them.en.split(" (")[0], Math.max(8, 22 - ko.length * 2)), ko].filter(Boolean).join(" · ");
+    s += `<g class="node${ego ? " ego" : ""}${dead(p) ? " dead" : ""}${sel === id ? " sel" : ""}${standing(p) ? " st-" + standing(p) : ""}${!ego && faded(id) ? " faded" : ""}" data-id="${id}" transform="translate(${q.x},${q.y})">
+      <title>${esc(p.name)} ${esc(life(p))}${ego ? "" : " — " + esc(r.them.en)}</title>
+      <rect width="${W}" height="${H}" rx="${p.sex === "f" ? 22 : 4}"/>
+      ${ego ? "" : `<rect x="${p.sex === "f" ? 14 : 3}" y="${H - 5}" width="${W - (p.sex === "f" ? 28 : 6)}" height="3" rx="1.5" style="fill:${lensColor(id)};stroke:none"/>`}
+      <text class="nm" x="${W / 2}" y="19" text-anchor="middle">${esc(clip(p.name, 19))}</text>
+      <text class="rl" x="${W / 2}" y="35" text-anchor="middle">${esc(sub)}</text>`;
+    if (!ego) s += `<circle cx="${W - 18}" cy="-6" r="4" class="s-${r.bond_out ? r.bond_out.state : "unset"}"><title>${t("how {name} keeps this bond", {name: esc(nm(egoId))})}</title></circle>
+      <circle cx="${W - 7}" cy="-6" r="4" class="s-${r.bond_in ? r.bond_in.state : "unset"}"><title>${t("how {name} keeps it", {name: esc(p.name)})}</title></circle>`;
+    s += `</g>`;
+  }
+  box.innerHTML = s + "</svg>";
+  zoomable(box, "tree" + egoId + reach, {x: 0, y: 0, w: L.width, h: L.height}, recenter, {x: L.pos[egoId].x + W / 2, y: L.pos[egoId].y + H / 2, cap: 1});
+  recenter = false;
+  box.querySelectorAll(".node").forEach(n => {
+    n.onclick = () => { const id = +n.dataset.id; sel = id === egoId ? null : id; examine = false; draw(); panel(); syncHash(); };
+    n.ondblclick = () => standAs(+n.dataset.id);
+  });
+  return ids;
+}
+function welcome() {
+  const n = Object.keys(S.people).length;
+  if (!n) return `<div class="card" style="margin:30px;max-width:620px"><h2>${t("No one is here yet")}</h2>
+    <p>${t("Bring in your Gramps tree from a terminal in this folder:")}</p><pre>./run.sh import-gramps --apply</pre>
+    <p>${t("or begin with yourself: {button}", {button: `<button class="btn pri" onclick="personDialog(null)">${t("+ Person")}</button>`})}</p></div>`;
+  return `<div class="card" style="margin:30px;max-width:620px"><h2>${t("Where do you stand?")}</h2>
+    <p>${t("{n} people are in the tree. Type a name in {stand} at the top to stand in that person's place. Then press {me} on your own page so the app remembers you.", {n, stand: `<b>${t("Stand as…")}</b>`, me: `<b>${t("This is me")}</b>`})}</p></div>`;
+}
+
+/* ---------- duties and marks ---------- */
+function dutyRow(d, mark, who, toward, withMarks = true) {
+  const m = mark ? mark.state : "";
+  const btn = (st, ch, tip) => `<button class="${st}${m === st ? " on" : ""}" title="${tip}" onclick="setMark(${who},${toward},${d.id},'${m === st ? "unset" : st}')">${ch}</button>`;
+  return `<div class="duty ${d.status}"><div class="t">${dutyText(d, esc(t(S.meta.spheres[d.sphere] || d.sphere)) + " · " + esc(t(S.meta.traditions[d.tradition] || d.tradition)) + (d.citation ? " · " + esc(d.citation) : "") + alsoIn(d) + (d.status === "draft" ? ` · <span class="tag draft">${t("draft")}</span>` : ""))}</div>
+    ${withMarks ? `<div class="marks">${btn("kept", "✓", t("kept"))}${btn("poorly", "~", t("kept, but not doing well"))}${btn("failing", "✕", t("failing"))}${btn("na", "–", t("does not apply"))}</div>` : ""}</div>`;
+}
+function dutyList(ids, marks, who, toward, withMarks = true) {
+  if (!ids.length) return `<p class="mute">${t("Nothing set down yet. Add duties in The Way.")}</p>`;
+  const by = {};
+  for (const id of ids) { const d = S.duties[id]; if (d) (by[d.sphere] ||= []).push(d); }
+  return Object.keys(S.meta.spheres).filter(k => by[k]).map(k =>
+    `<div class="sphere" data-sphere="${k}">${esc(t(S.meta.spheres[k]))}</div>` + by[k].map(d => dutyRow(d, marks && marks[d.id], who, toward, withMarks)).join("")).join("");
+}
+async function setMark(person, toward, duty, state) {
+  await api("POST", "/api/mark", {person_id: person, toward_id: toward, duty_id: duty, state});
+  const keep = $("#panel").scrollTop;
+  await loadEgo(); panel(); $("#panel").scrollTop = keep;
+  if (view === "duties" || lensKey() === "duties") draw();
+}
+async function setBond(from, to, state, note) {
+  await api("POST", "/api/bond", {from_id: from, to_id: to, state, note: note ?? ""});
+  await loadEgo(); render();
+}
+function bondChips(from, to, cur, label) {
+  const st = cur ? cur.state : "";
+  return `<div style="margin-top:6px"><div class="mute" style="font-size:12px">${label}</div><div class="chips">` +
+    ["kept", "strained", "broken", "severed"].map(x => `<span class="chip ${x}${st === x ? " on" : ""}" onclick="setBond(${from},${to},'${st === x ? "unset" : x}',this.closest('div').nextElementSibling.value)">${t(x)}</span>`).join("") +
+    `</div><input type="text" class="note" placeholder="${t("note (why, since when)")}" value="${esc(cur ? cur.note : "")}" onchange="${st ? `setBond(${from},${to},'${st}',this.value)` : ""}"></div>`;
+}
+
+/* ---------- side panel ---------- */
+const roleChips = tags => tags.filter(x => x !== "kin" && x !== "member").map(x => `<span class="tag">${esc(t(S.meta.roles[x] || x))}</span>`).join(" ") || `<span class="mute">${t("kinsman")}</span>`;
+function standingBox(p) {
+  const st = p.standing || "member";
+  return `<div class="row st-${st}" style="margin:8px 0;gap:6px"><span class="mute" style="font-size:12px">${t("Standing in the family")}</span>
+    <select onchange="setStanding(${p.id},{standing:this.value})">${Object.entries(S.meta.standings).map(([k, v]) => `<option value="${k}"${st === k ? " selected" : ""}>${esc(t(v))}</option>`).join("")}</select>
+    ${st !== "member" ? `<input type="text" style="width:104px" placeholder="${st === "entering" ? t("to be received (date)") : t("since (date)")}" value="${esc(p.standing_date || "")}" onchange="setStanding(${p.id},{standing_date:this.value})">
+    <input type="text" class="note" placeholder="${st === "cut_off" ? t("why, by whom, and what would restore him") : st === "entering" ? t("what remains before they are received") : t("what happened")}" value="${esc(p.standing_note || "")}" onchange="setStanding(${p.id},{standing_note:this.value})">` : ""}</div>`;
+}
+async function setStanding(id, body) { await api("PUT", "/api/person/" + id, body); await refresh(); }
+function panel() {
+  const el = $("#panel");
+  if (!E) { el.innerHTML = ""; return; }
+  const ego = E.ego;
+  if (sel && E.rels[sel]) {
+    const p = P(sel), r = E.rels[sel];
+    const line = (who, x, whose) => `<div>${t("{a} is {b}’s {rel}", {a: `<b>${esc(who)}</b>`, b: esc(whose), rel: `<b>${esc(x.en)}</b>`})}${native(x) ? ` <span class="ko">${esc(native(x))}</span>` : ""}${x.chon ? ` <span class="mute">· ${x.chon}촌</span>` : ""}</div>`;
+    el.innerHTML = `<h2>${esc(p.name)} ${p.ko_name ? `<span class="ko">${esc(p.ko_name)}</span>` : ""} ${stBadge(p)}</h2>
+      <div class="mute">${esc(life(p))}</div>
+      ${headLine(sel)}
+      ${standingBox(p)}
+      ${headshipBox(p)}
+      <div class="rel">${line(p.name, r.them, ego.name)}${line(ego.name, r.me, p.name)}</div>
+      <div class="mute" style="font-size:12px">${t("{a}’s roles toward {b}", {a: esc(ego.name), b: esc(p.name)})}</div>
+      <div class="chips">${roleChips(r.me.tags)}</div>
+      <div class="row"><button class="btn sm pri" onclick="standAs(${sel})">${t("Stand here")}</button>
+        <button class="btn sm" onclick="personDialog(${sel})">${t("Edit")}</button>
+        <button class="btn sm" onclick="betweenIds=[${egoId},${sel}];betweenAuto=null;betweenCell=null;showTab('between');render()">${t("Between")}</button>
+        <button class="btn sm" onclick="historyDialog(${egoId},${sel})">${t("History")}</button>
+        ${ego.sex === "m" && !dead(ego) && !dead(p) ? (p.carried_by === egoId
+          ? `<button class="btn sm" onclick="setStanding(${sel},{carried_by:null,carried_note:''})">${t("{a} no longer carries {b}", {a: esc(ego.name), b: esc(p.name)})}</button>`
+          : `<button class="btn sm" onclick="setStanding(${sel},{carried_by:${egoId},carried_note:prompt(t('How are they carried? (optional)'))||''})">${t("{a} carries {b}", {a: esc(ego.name), b: esc(p.name)})}</button>`) : ""}</div>
+      <div class="sect"><h3>${t("The bond")}</h3>
+        ${bondChips(egoId, sel, r.bond_out, t("{a} toward {b}", {a: esc(ego.name), b: esc(p.name)}))}
+        ${bondChips(sel, egoId, r.bond_in, t("{a} toward {b}", {a: esc(p.name), b: esc(ego.name)}))}</div>
+      <div class="sect"><h3>${t("{a} owes {b}", {a: esc(ego.name), b: esc(p.name)})}</h3>${dutyList(r.owe, r.marks_out, egoId, sel)}</div>
+      <div class="sect"><h3>${t("{a} owes {b}", {a: esc(p.name), b: esc(ego.name)})}</h3>${dutyList(r.owed, r.marks_in, sel, egoId)}</div>`;
+    return;
+  }
+  const ids = shown().sort((a, b) => E.rels[a].them.path.length - E.rels[b].them.path.length || rank(a) - rank(b));
+  const hh = S.households.find(h => h.id === ego.household_id);
+  let kept = 0, poorly = 0, failing = 0, na = 0, total = 0;
+  for (const id of ids) { const r = E.rels[id]; total += r.owe.length; for (const m of Object.values(r.marks_out)) { if (m.state === "kept") kept++; if (m.state === "poorly") poorly++; if (m.state === "failing") failing++; if (m.state === "na") na++; } }
+  const coll = E.collective.filter(id => S.duties[id]);
+  const house = coll.filter(id => S.duties[id].to_role === "household"), clan = coll.filter(id => S.duties[id].to_role === "clan"),
+    outside = coll.filter(id => S.duties[id].to_role === "outside");
+  let body = "";
+  if (examine) {
+    body = ids.filter(id => E.rels[id].owe.length).map(id => `<div class="sect"><h3>${t("Toward {name}", {name: esc(nm(id))})} <span class="mute" style="font-size:13px;font-family:system-ui">${esc(E.rels[id].them.en.split(" (")[0])}</span></h3>${dutyList(E.rels[id].owe, E.rels[id].marks_out, egoId, id)}</div>`).join("");
+  } else {
+    body = `<div class="sect"><h3>${t("Stands among")}</h3>` + ids.map(id => { const r = E.rels[id];
+      return `<div class="duty" style="cursor:pointer" onclick="sel=${id};draw();panel()"><div class="t"><span>${esc(nm(id))}</span><span class="src">${esc(r.them.en.split(" (")[0])}${native(r.them) ? ` · <span class="ko">${esc(native(r.them))}</span>` : ""}</span></div><span class="mute" style="font-size:12px">${t("owes {a} · owed {b}", {a: r.owe.length, b: r.owed.length})}</span></div>`; }).join("") + `</div>`;
+  }
+  el.innerHTML = `<h2>${esc(ego.name)} ${ego.ko_name ? `<span class="ko">${esc(ego.ko_name)}</span>` : ""}</h2>
+    <div class="mute">${esc(life(ego))}${hh ? " · " + t("house of {name}", {name: esc(hh.name)}) : ""}</div>
+    ${headLine(egoId)}
+    ${standingBox(ego)}
+    ${headshipBox(P(egoId))}
+    ${E.house_line ? succession(E.house_line, t("Order of succession over {name}’s house", {name: ego.name})) : ""}
+    <div class="row" style="margin:10px 0">
+      ${S.me === egoId ? `<span class="tag confirmed">${t("this is me")}</span>` : `<button class="btn sm" onclick="setSetting('me',${egoId})">${t("This is me")}</button>`}
+      <button class="btn sm" onclick="personDialog(${egoId})">${t("Edit / add kin")}</button>
+      <button class="btn sm ${examine ? "pri" : ""}" onclick="examine=!examine;panel()">${examine ? t("Done examining") : t("Examine")}</button>
+      <button class="btn sm" onclick="printSheet()">${t("Print sheet")}</button>
+      <button class="btn sm" onclick="printCharge(${egoId})" title="${t("a page to print: who is under your headship and in your care, with room for notes")}">${t("Print charge")}</button>
+      <button class="btn sm" onclick="printRegister(${egoId})" title="${t("the house's register to the fourth generation, and the graves of the family")}">${t("Print register")}</button>
+      ${ego.sex === "m" && !dead(ego) ? `<button class="btn sm" onclick="ifDies(${egoId})" title="${t("who takes up each house he heads or keeps, and who would be left without a guardian")}">${t("If he dies…")}</button>` : ""}
+      <button class="btn sm" onclick="matterDialog(null, ${egoId})">${t("Open a matter")}</button></div>
+    ${(() => { const ms = (S.matters || []).filter(m => m.person_id === egoId || m.other_id === egoId); return ms.length ? `<div class="sect"><h3>${t("Matters before the family")}</h3>${ms.map(matterLine).join("")}</div>` : ""; })()}
+    <div class="mute" style="font-size:13px">${t("{n} duties toward those on screen", {n: total})} · <span style="color:var(--kept)">${t("{n} kept", {n: kept})}</span> · <span style="color:var(--strained)">${t("{n} not doing well", {n: poorly})}</span> · <span style="color:var(--broken)">${t("{n} failing", {n: failing})}</span> · ${t("{n} n/a", {n: na})} · ${t("{n} not examined", {n: total - kept - poorly - failing - na})}</div>
+    ${body}
+    ${house.length ? `<div class="sect"><h3>${t("To the household")}</h3>${dutyList(house, E.marks_collective, egoId, 0)}</div>` : ""}
+    <div class="sect"><h3>${t("To the clan")}</h3>${dutyList(clan, E.marks_collective, egoId, 0)}</div>
+    ${outside.length ? `<div class="sect"><h3>${t("To those outside the family")}</h3>${dutyList(outside, E.marks_collective, egoId, 0)}</div>` : ""}`;
+}
+async function setSetting(key, value) { await api("PUT", "/api/setting", {key, value}); await refresh(); }
+
+/* ---------- dialogs ---------- */
+const dlg = $("#dlg");
+function openDlg(html) { dlg.innerHTML = html; if (!dlg.open) dlg.showModal(); }
+function personDialog(id) {
+  const p = id ? P(id) : {name: "", ko_name: "", sex: "m", birth: "", death: "", household_id: null, notes: ""};
+  const parents = id ? S.links.filter(l => l.child_id === id) : [], kids = id ? S.links.filter(l => l.parent_id === id) : [];
+  const uns = id ? S.unions.filter(u => u.a_id === id || u.b_id === id) : [];
+  const li = (label, pid, del) => `<div class="duty"><div class="t"><span>${esc(nm(pid))}</span><span class="src">${label}</span></div><button class="btn sm" onclick="${del}">${t("remove")}</button></div>`;
+  openDlg(`<h2>${id ? t("Edit {name}", {name: esc(p.name)}) : t("New person")}</h2>
+    <label>${t("Name")}</label><input type="text" id="f_name" value="${esc(p.name)}">
+    <div class="row"><div style="flex:1"><label>${t("Name in Korean or Chinese")}</label><input type="text" id="f_ko" value="${esc(p.ko_name)}"></div>
+      <div><label>${t("Sex")}</label><select id="f_sex">${["m", "f", "u"].map(x => `<option value="${x}"${p.sex === x ? " selected" : ""}>${{m: t("male"), f: t("female"), u: t("unknown")}[x]}</option>`).join("")}</select></div></div>
+    <div class="row"><div style="flex:1"><label>${t("Born (YYYY or YYYY-MM-DD)")}</label><input type="text" id="f_birth" value="${esc(p.birth)}"></div>
+      <div style="flex:1"><label>${t("Died (blank if living, ? if unknown date)")}</label><input type="text" id="f_death" value="${esc(p.death)}"></div></div>
+    <label>${t("Birth order among brothers and sisters (1 = first-born; only needed when dates are unknown)")}</label><input type="number" min="1" id="f_order" style="width:80px" value="${esc(p.birth_order || "")}">
+    <label>${t("Household")}</label><select id="f_house"><option value="">—</option>${S.households.map(h => `<option value="${h.id}"${p.household_id === h.id ? " selected" : ""}>${esc(h.name)}</option>`).join("")}</select>
+    <label>${t("Where buried (for the family's register of graves)")}</label><input type="text" id="f_burial" value="${esc(p.burial || "")}" placeholder="${t("cemetery, town, plot")}">
+    ${(() => { const y = +yr(p); if (id && y && y <= new Date().getFullYear() - 18) return ""; const opts = Object.values(S.people).filter(x => !dead(x) && x.id !== id && ofFamily(x.id) && +yr(x) && +yr(x) <= new Date().getFullYear() - 21).sort((a, b) => a.name.localeCompare(b.name));
+      return `<label>${t("Guardian named for this child, should the parents die (as in a will)")}</label><select id="f_guardian"><option value="">${t("none named")}</option>${opts.map(x => `<option value="${x.id}"${p.guardian_id === x.id ? " selected" : ""}>${esc(x.name)} ${yr(x) ? t("(b. {year})", {year: yr(x)}) : ""}</option>`).join("")}</select>`; })()}
+    <label>${t("Notes")}</label><textarea id="f_notes" rows="2">${esc(p.notes)}</textarea>
+    ${id ? `<div class="sect"><h3>${t("Kin on record")}</h3>
+      ${parents.map(l => li(t("parent") + (l.kind !== "birth" ? " (" + t(l.kind) + ")" : ""), l.parent_id, `rm('link?parent=${l.parent_id}&child=${id}',${id})`)).join("")}
+      ${uns.map(u => li(`${t("spouse")} · <select onchange="api('PUT','/api/union/${u.id}',{status:this.value}).then(refresh)">${["married", "separated", "widowed", "divorced", "paramour"].map(x => `<option value="${x}"${u.status === x ? " selected" : ""}>${t(x)}</option>`).join("")}</select>`, u.a_id === id ? u.b_id : u.a_id, `rm('union/${u.id}',${id})`)).join("")}
+      ${kids.map(l => li(t("child") + (l.kind !== "birth" ? " (" + t(l.kind) + ")" : ""), l.child_id, `rm('link?parent=${id}&child=${l.child_id}',${id})`)).join("")}
+      <div class="row" style="margin-top:10px"><select id="k_type"><option value="parent">${t("add parent")}</option><option value="spouse">${t("add spouse")}</option><option value="child">${t("add child")}</option><option value="sibling">${t("add sibling")}</option></select>
+        <div class="find" style="flex:1"><input type="text" id="k_name" placeholder="${t("name: pick someone, or type a new one")}" style="width:100%" autocomplete="off"><div class="drop" id="k_drop" hidden></div></div>
+        <select id="k_sex"><option value="m">${t("m")}</option><option value="f">${t("f")}</option></select>
+        <input type="text" id="k_birth" placeholder="${t("born")}" style="width:80px">
+        <button class="btn" onclick="addKin(${id},null)">${t("Add")}</button></div>
+      <label><input type="checkbox" id="k_both" checked> ${t("a new child is also the child of the current spouse")}</label></div>` : ""}
+    <div class="err" id="f_err"></div>
+    <div class="row" style="justify-content:space-between;margin-top:8px">
+      <span>${id ? `<button class="btn" onclick="delPerson(${id})">${t("Delete person")}</button>` : ""}</span>
+      <span><button class="btn" onclick="dlg.close()">${t("Close")}</button> <button class="btn pri" onclick="savePerson(${id})">${t("Save")}</button></span></div>`);
+  if (id) attachFinder($("#k_name"), $("#k_drop"), pid => addKin(id, pid));
+}
+const fail = e => { const el = $("#f_err"); if (el) el.textContent = e.message; else alert(e.message); };
+async function savePerson(id) {
+  const body = {name: $("#f_name").value.trim(), ko_name: $("#f_ko").value.trim(), sex: $("#f_sex").value, birth: $("#f_birth").value.trim(),
+    death: $("#f_death").value.trim(), household_id: +$("#f_house").value || null, notes: $("#f_notes").value, birth_order: +$("#f_order").value || null,
+    burial: $("#f_burial").value.trim(), ...($("#f_guardian") ? {guardian_id: +$("#f_guardian").value || null} : {})};
+  try {
+    if (id) await api("PUT", "/api/person/" + id, body);
+    else { const r = await api("POST", "/api/person", body); egoId = egoId ?? r.id; id = r.id; }
+    dlg.close(); await loadState();
+    if (!E) return standAs(id);
+    await loadEgo(); render();
+  } catch (e) { fail(e); }
+}
+async function delPerson(id) {
+  if (!confirm(t("Delete {name} and every link, bond and mark attached to them?", {name: nm(id)}))) return;
+  await api("DELETE", "/api/person/" + id);
+  dlg.close(); if (egoId === id) egoId = S.me !== id ? S.me : null; sel = null; await refresh();
+}
+async function rm(path, id) { try { await api("DELETE", "/api/" + path); await refresh(); personDialog(id); } catch (e) { fail(e); } }
+async function addKin(id, existing) {
+  try {
+    const type = $("#k_type").value;
+    const parents = S.links.filter(l => l.child_id === id).map(l => l.parent_id);
+    if (type === "sibling" && !parents.length) throw new Error(t("Add a parent first; siblings are those who share one."));
+    let kid = existing;
+    if (!kid) {
+      const name = $("#k_name").value.trim();
+      if (!name) throw new Error(t("Type a name."));
+      kid = (await api("POST", "/api/person", {name, sex: $("#k_sex").value, birth: $("#k_birth").value.trim()})).id;
+    }
+    if (type === "parent") await api("POST", "/api/link", {parent_id: kid, child_id: id});
+    if (type === "spouse") await api("POST", "/api/union", {a_id: id, b_id: kid});
+    if (type === "sibling") for (const p of parents) await api("POST", "/api/link", {parent_id: p, child_id: kid});
+    if (type === "child") {
+      await api("POST", "/api/link", {parent_id: id, child_id: kid});
+      const sp = S.unions.filter(u => (u.a_id === id || u.b_id === id) && !["divorced", "paramour"].includes(u.status)).map(u => u.a_id === id ? u.b_id : u.a_id);
+      if ($("#k_both").checked && sp.length === 1) await api("POST", "/api/link", {parent_id: sp[0], child_id: kid});
+    }
+    await refresh(); personDialog(id);
+  } catch (e) { fail(e); }
+}
+async function historyDialog(a, b) {
+  const h = await api("GET", `/api/history?a=${a}&b=${b}`);
+  const when = ts => new Date(ts * 1000).toISOString().slice(0, 10);
+  openDlg(`<h2>${t("History: {a} and {b}", {a: esc(nm(a)), b: esc(nm(b))})}</h2>
+    <div class="sect"><h3>${t("The bond")}</h3>${h.bonds.map(x => `<div class="duty"><div class="t"><span>${esc(nm(x.from_id))} → ${esc(nm(x.to_id))}: <b>${t(x.state)}</b></span><span class="src">${esc(x.note)}</span></div><span class="mute">${when(x.at)}</span></div>`).join("") || `<p class="mute">${t("Nothing recorded.")}</p>`}</div>
+    <div class="sect"><h3>${t("Duties")}</h3>${h.marks.map(x => `<div class="duty"><div class="t"><span>${esc(nm(x.person_id))}: ${esc(dtext(S.duties[x.duty_id]))}</span><span class="src">${markLabel(x.state)}</span></div><span class="mute">${when(x.at)}</span></div>`).join("") || `<p class="mute">${t("Nothing recorded.")}</p>`}</div>
+    <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" onclick="dlg.close()">${t("Close")}</button></div>`);
+}
+
+/* ---------- family map: houses nested inside houses, no lines to cross ---------- */
+function openToward(id) {            // my roles and duties toward this person
+  const from = S.me && P(S.me) ? S.me : egoId;
+  if (from == null || from === id) return standAs(id);
+  standAs(from).then(() => { if (E.rels[id]) { sel = id; draw(); panel(); } else standAs(id); });
+}
+function drawMap() {
+  const el = $("#map");
+  if (!Object.keys(S.people).length) { el.innerHTML = welcome(); return; }
+  const kidsOf = {}, parentsOf = {}, spousesOf = {};
+  for (const l of S.links) { (kidsOf[l.parent_id] ||= []).push(l.child_id); (parentsOf[l.child_id] ||= []).push(l.parent_id); }
+  for (const u of S.unions) { (spousesOf[u.a_id] ||= []).push([u.b_id, u.status]); (spousesOf[u.b_id] ||= []).push([u.a_id, u.status]); }
+  // roots on offer: the ancestors of whoever we are standing as
+  const anc = [], seenA = new Set();
+  const climb = (id, label, d) => { if (seenA.has(id) || d > 4) return; seenA.add(id); anc.push([id, label, d]);
+    for (const p of parentsOf[id] || []) climb(p, d ? (P(p).sex === "f" ? t("{rel}’s mother", {rel: label}) : t("{rel}’s father", {rel: label})) : (P(p).sex === "f" ? t("mother") : t("father")), d + 1); };
+  const base = egoId ?? S.me;
+  if (base != null && P(base)) climb(base, "", 0);
+  if (mapRoot == null || !P(mapRoot)) {            // default: up the father's line, three generations
+    let r = base; for (let i = 0; r != null && i < 3; i++) { const f = (parentsOf[r] || []).find(p => P(p).sex === "m") ?? (parentsOf[r] || [])[0]; if (f == null) break; r = f; }
+    mapRoot = r ?? +Object.keys(S.people)[0];
+  }
+  const alive = {}, hasLiving = id => alive[id] ??= (alive[id] = false, !dead(P(id)) || (kidsOf[id] || []).some(hasLiving));
+  const shownSet = new Set();
+  const chip = id => { const p = P(id), r = E && E.rels[id]; shownSet.add(id);
+    return `<span class="pchip ${p.sex === "f" ? "f" : ""}${dead(p) ? " dead" : ""}${standing(p) ? " st-" + standing(p) : ""}${id === egoId ? " is-ego" : ""}" onclick="openToward(${id})" title="${esc(p.name)} ${esc(life(p))}${r ? " — " + t("{name}’s {rel}", {name: esc(nm(egoId)), rel: esc(r.them.en)}) : ""}">
+      <i style="background:${lensColor(id)}"></i><b style="font-weight:600">${esc(p.name)}</b>
+      <small>${r ? esc(native(r.them).split(" (")[0] || r.them.en.split(" (")[0]) : esc(yr(p))}</small>${id === theHead() ? ` <span class="badge" style="background:var(--seal)">${t("Head of the family")}</span>` : isHouseHead(id) ? ` <small style="color:var(--seal);font-weight:600">${t("head")}</small>` : ""}${standing(p) ? ` <small>${esc(t(S.meta.standings[standing(p)]))}</small>` : ""}${p.headship && !dead(p) ? ` <small style="color:var(--broken)">${esc(t(S.meta.headship[p.headship]))}</small>` : ""}</span>`; };
+  const done = new Set();
+  const house = (id, d) => {
+    if (done.has(id)) return chip(id);
+    done.add(id);
+    const sp = (spousesOf[id] || []).filter(([x]) => !mapLiving || !dead(P(x)) || !dead(P(id)) || (kidsOf[x] || []).some(hasLiving));
+    let ks = [...new Set(kidsOf[id] || [])].filter(k => !mapLiving || hasLiving(k)).sort((a, b) => (P(a).birth || "9999").localeCompare(P(b).birth || "9999"));
+    sp.forEach(([x]) => done.add(x));
+    const wed = st => st === "paramour" ? `<span class="wed" title="${t("paramour: living together, unmarried")}">≈</span>` : `<span class="wed" title="${esc(t(st))}">${st === "divorced" ? "⚮" : "⚭"}</span>`;
+    // the man stands first in his house, whichever of the two is the blood relative
+    const man = P(id).sex !== "m" && sp.length === 1 && P(sp[0][0]).sex === "m" && !["divorced", "paramour"].includes(sp[0][1]);
+    const pair = man ? chip(sp[0][0]) + wed(sp[0][1]) + chip(id) : chip(id) + sp.map(([x, st]) => wed(st) + chip(x)).join("");
+    if (!ks.length) return d ? pair : `<div class="couple">${pair}</div>`;
+    const below = new Set(), walk = k => { if (below.has(k)) return; below.add(k); (kidsOf[k] || []).forEach(walk); }; ks.forEach(walk);
+    const shut = mapShut.has(id);
+    const head = `<div class="couple">${pair}<button class="tog" title="${shut ? t("open this house") : t("fold this house")}" onclick="toggleHouse(${id})">${shut ? "▸ " + t("{n} within", {n: below.size}) : "▾"}</button></div>`;
+    if (shut) { for (const k of below) shownSet.delete(k); return `<div class="house d${d} shut">${head}</div>`; }
+    const leaf = k => !(kidsOf[k] || []).some(c => !mapLiving || hasLiving(c));
+    return `<div class="house d${d}">${head}<div class="kids">${ks.map(k => leaf(k) ? `<span class="couple">${house(k, d + 1)}</span>` : house(k, d + 1)).join("")}</div></div>`;
+  };
+  const body = house(mapRoot, 0);
+  const counts = {}; for (const id of shownSet) { const k = dead(P(id)) ? "dead" : (standing(P(id)) || "member"); counts[k] = (counts[k] || 0) + 1; }
+  el.innerHTML = `<div class="card"><div class="row">
+      <span>${t("The house of")}</span><select onchange="mapRoot=+this.value;drawMap()">${(anc.some(a => a[0] === mapRoot) ? anc : [[mapRoot, "", 0], ...anc]).sort((a, b) => b[2] - a[2]).map(([id, label]) => `<option value="${id}"${id === mapRoot ? " selected" : ""}>${esc(nm(id))}${label ? " (" + esc(label) + ")" : id === base ? " (" + t("standing here") + ")" : ""}</option>`).join("")}</select>
+      <label class="mute" style="font-size:13px"><input type="checkbox" ${mapLiving ? "checked" : ""} onchange="mapLiving=this.checked;drawMap()"> ${t("only lines with someone living")}</label>
+      <button class="btn sm" onclick="mapShut.clear();drawMap()">${t("open every house")}</button>
+      <button class="btn sm" onclick="foldMap()">${t("fold to the first houses")}</button>
+      <span class="grow"></span>
+      <span class="legend"><span class="pchip" style="cursor:default">${t("member")}</span><span class="pchip st-entering" style="cursor:default">${t("being received")}</span><span class="pchip st-estranged" style="cursor:default">${t("estranged")}</span><span class="pchip st-cut_off" style="cursor:default"><b>${t("cut off")}</b></span><span class="pchip dead" style="cursor:default">${t("dead")}</span><span>${t("{head} = head of his house", {head: `<small style="color:var(--seal);font-weight:600">${t("head")}</small>`})}</span></span></div>
+    <div class="mute" style="font-size:13px;margin-top:8px">${t("{n} members", {n: counts.member || 0})} · ${t("{n} being received", {n: counts.entering || 0})} · ${t("{n} estranged", {n: counts.estranged || 0})} · ${t("{n} cut off", {n: counts.cut_off || 0})} · ${t("{n} dead shown.", {n: counts.dead || 0})}
+      ${t("Each box is a house: the couple on top, their children inside; ▾ folds a house away. The dot beside each name follows the color chosen here.")} ${S.me ? t("Click anyone for your roles and duties toward them.") : t("Click anyone for the roles and duties toward them.")}</div>
+    <div class="row" style="margin-top:8px;gap:6px 10px">${lensControls([...shownSet], "map")}</div></div>
+    <div class="card" style="overflow:auto">${body}</div>`;
+}
+let mapShut = new Set();
+function toggleHouse(id) { mapShut.has(id) ? mapShut.delete(id) : mapShut.add(id); drawMap(); }
+function foldMap() {                 // fold every house below the root's children
+  const x = IX(); mapShut.clear();
+  for (const k of x.kids[mapRoot] || []) for (const g of x.kids[k] || []) if ((x.kids[g] || []).length) mapShut.add(g);
+  drawMap();
+}
+
+/* ---------- between ---------- */
+/* the living nearest to whoever you stand as: husband or wife, parents, children, brothers and sisters */
+function nearestKin() {
+  const rank = {S: 0, P: 1, C: 2, PC: 3};
+  return Object.keys(E.rels).map(Number).filter(id => E.rels[id].them.path in rank && !dead(P(id)))
+    .sort((a, b) => rank[E.rels[a].them.path] - rank[E.rels[b].them.path] || (IX().est[a] ?? 9999) - (IX().est[b] ?? 9999)).slice(0, 11);
+}
+async function drawBetween() {
+  const el = $("#between");
+  if (E && ((!betweenIds.length && !betweenCleared) || (betweenAuto != null && betweenAuto !== egoId))) { betweenIds = [egoId, ...nearestKin()]; betweenAuto = egoId; betweenCell = null; }
+  const chips = betweenIds.map(id => `<span class="chip" onclick="betweenIds=betweenIds.filter(x=>x!==${id});betweenAuto=null;betweenCleared=true;drawBetween()">${esc(nm(id))} ✕</span>`).join("");
+  let table = `<p class="mute">${t("Choose two or more people to see what each is to each, and what each owes.")}</p>`, detail = "";
+  if (betweenIds.length > 1) {
+    const B = (await api("GET", "/api/between?ids=" + betweenIds.join(","))).matrix;
+    table = betweenCircle(betweenIds, B) + `<p class="mute" style="font-size:13px;text-align:center;margin-top:0">${t("A line joins every two people with a known tie: its color is the worse of the two bonds, its thickness how much they owe each other. Click a line for the duties; click a name to stand there.")}</p><table><tr><th>${t("↓ looks at →")}</th>${betweenIds.map(b => `<th>${esc(nm(b))}</th>`).join("")}</tr>` + betweenIds.map(a =>
+      `<tr><th>${esc(nm(a))}</th>` + betweenIds.map(b => { const c = (B[a] || {})[b];
+        if (a === b) return `<td class="mute">—</td>`;
+        if (!c) return `<td class="mute">${t("no known tie")}</td>`;
+        return `<td class="cell ${c.bond ? c.bond.state : ""}" onclick="betweenCell=[${a},${b}];drawBetween()">${esc(c.en.split(" (")[0])}<br>${native(c) ? `<span class="ko">${esc(native(c))}</span> · ` : ""}<span class="mute">${t("owes {n}", {n: c.owe.length})}</span></td>`; }).join("") + `</tr>`).join("") + `</table>
+      <p class="mute" style="font-size:13px">${t("Read across: the row person calls the column person by that name. The colored edge is how the row person keeps the bond. Click a cell for the duties.")}</p>`;
+    if (betweenCell && B[betweenCell[0]] && B[betweenCell[0]][betweenCell[1]]) {
+      const [a, b] = betweenCell, c = B[a][b], back = (B[b] || {})[a];
+      detail = `<div class="card"><h3>${t("{a} and {b}", {a: esc(nm(a)), b: esc(nm(b))})}</h3>
+        <div class="cols"><div>${bondChips(a, b, c.bond, t("{a} toward {b} ({rel})", {a: esc(nm(a)), b: esc(nm(b)), rel: esc(c.en.split(" (")[0])}))}</div>
+        ${back ? `<div>${bondChips(b, a, back.bond, t("{a} toward {b} ({rel})", {a: esc(nm(b)), b: esc(nm(a)), rel: esc(back.en.split(" (")[0])}))}</div>` : ""}</div>
+        <h3 style="margin-top:12px">${t("{a} owes {b}", {a: esc(nm(a)), b: esc(nm(b))})} <span class="mute" style="font-size:13px;font-family:system-ui">(${esc(c.en)})</span></h3>${dutyList(c.owe, null, a, b, false)}
+        <div class="row" style="margin-top:10px"><button class="btn sm" onclick="standAs(${a}).then(()=>{sel=${b};draw();panel()})">${t("Open to judge and mark")}</button></div></div>`;
+    }
+  }
+  el.innerHTML = `<div class="card"><div class="row"><div class="find"><input type="search" id="bq" placeholder="${t("add a person…")}" autocomplete="off"><div class="drop" id="bdrop" hidden></div></div>
+      <select id="bhouse"><option value="">${t("add a household…")}</option>${S.households.map(h => `<option value="${h.id}">${esc(h.name)}</option>`).join("")}</select>
+      ${E ? `<button class="btn sm" onclick="addBetween([egoId,...shown().filter(i=>!dead(P(i)))])">${t("add {name}’s living close kin", {name: esc(nm(egoId))})}</button>` : ""}
+      ${E ? `<button class="btn sm" onclick="betweenIds=[];betweenCleared=false;betweenAuto=null;drawBetween()">${t("{name} and nearest kin", {name: esc(nm(egoId))})}</button>` : ""}
+      <button class="btn sm" onclick="betweenIds=[];betweenCell=null;betweenAuto=null;betweenCleared=true;drawBetween()">${t("clear")}</button></div>
+    <div class="chips" style="margin-top:8px">${chips}</div></div><div style="overflow:auto">${table}</div><div style="margin-top:14px">${detail}</div>`;
+  attachFinder($("#bq"), $("#bdrop"), id => addBetween([id]));
+  $("#bhouse").onchange = e => addBetween(Object.values(S.people).filter(p => p.household_id === +e.target.value).map(p => p.id));
+}
+function addBetween(ids) { betweenAuto = null; for (const i of ids) if (!betweenIds.includes(i) && betweenIds.length < 14) betweenIds.push(i); drawBetween(); }
+
+/* ---------- the way ---------- */
+function wayDuties() {
+  const f = wayFilter, q = f.text.toLowerCase();
+  return Object.values(S.duties).filter(d => (!f.from || d.from_role === f.from) && (!f.trad || tradsOf(d).includes(f.trad))
+    && (f.status ? d.status === f.status : d.status !== "retired") && (!q || (d.text + " " + d.citation + " " + d.reason + " " + (d.attest || []).map(a => a.citation + " " + a.quote).join(" ")).toLowerCase().includes(q)));
+}
+/* review the drafts a few at a time, by who owes them, with the sources open: confirm, retire with a reason, or pass */
+let wayReview = false;
+const reviewSkip = new Set();
+function drawReview() {
+  const M = S.meta, order = Object.keys(M.roles), all = Object.values(S.duties);
+  const drafts = all.filter(d => d.status === "draft").sort((a, b) => order.indexOf(a.from_role) - order.indexOf(b.from_role)
+    || order.indexOf(a.to_role) - order.indexOf(b.to_role) || Object.keys(M.spheres).indexOf(a.sphere) - Object.keys(M.spheres).indexOf(b.sphere));
+  const left = drafts.filter(d => !reviewSkip.has(d.id)), batch = left.slice(0, 8);
+  const done = all.filter(d => d.status !== "draft").length, pct = Math.round(100 * done / (all.length || 1));
+  const card = d => `<div class="card" style="margin:10px 0"><div class="mute" style="font-size:12px">${esc(t(M.roles[d.from_role] || d.from_role))} → ${esc(t(M.roles[d.to_role] || d.to_role))} · ${esc(t(M.spheres[d.sphere] || d.sphere))}</div>
+    ${dutyText(d, esc(t(M.traditions[d.tradition] || d.tradition)) + (d.citation ? " · " + esc(d.citation) : "") + alsoIn(d)).replace('<details class="dx">', '<details class="dx" open>')}
+    <div class="row" style="margin-top:8px"><button class="btn pri" onclick="reviewAct(${d.id},'confirmed')">${t("Confirm")}</button>
+      <button class="btn" onclick="dutyDialog(${d.id})">${t("Edit wording")}</button>
+      <button class="btn" onclick="reviewAct(${d.id},'retired')" title="${t("the house does not keep this; you will be asked why")}">${t("Retire")}</button>
+      <button class="btn" onclick="reviewSkip.add(${d.id});drawWay()">${t("Pass for now")}</button></div></div>`;
+  $("#way").innerHTML = `<div style="max-width:820px"><div class="card"><div class="row"><h2 class="grow" style="font-size:20px;margin:0">${t("Reviewing the drafts")}</h2>
+      <button class="btn" onclick="wayReview=false;drawWay()">${t("Done for now")}</button></div>
+    <p style="margin:6px 0">${t("{done} of {total} duties decided ({pct}%) · {left} drafts left", {done, total: all.length, pct, left: drafts.length})}${reviewSkip.size ? ` · ${t("{n} passed over this session", {n: reviewSkip.size})}` : ""}.
+      ${t("Each draft shows where it comes from; confirm what the house keeps, retire what it does not (with the reason), and pass over what you want to come back to.")}</p>
+    <div style="height:6px;background:var(--line);border-radius:3px"><div style="height:6px;width:${pct}%;background:var(--kept);border-radius:3px"></div></div></div>
+    ${batch.map(card).join("") || `<div class="card"><p>${drafts.length ? t("You have passed over every remaining draft this session.") : t("Every duty has been decided.")}</p>
+      ${reviewSkip.size ? `<button class="btn" onclick="reviewSkip.clear();drawWay()">${t("Go back to the ones passed over")}</button>` : ""}</div>`}</div>`;
+}
+async function reviewAct(id, status) {
+  const body = {status};
+  if (status === "retired") {
+    const why = prompt(t("Why does the house not keep this? (recorded with the duty)"));
+    if (why == null) return;
+    body.reason = why.trim();
+  }
+  await api("PUT", "/api/duty/" + id, body); await loadState(); await loadEgo(); drawWay();
+}
+function drawWay() {
+  if (wayReview) return drawReview();
+  const M = S.meta, list = wayDuties(), groups = {};
+  for (const d of list) (groups[d.from_role + ">" + d.to_role] ||= []).push(d);
+  const opt = (o, cur, any) => `<option value="">${any}</option>` + Object.entries(o).map(([k, v]) => `<option value="${k}"${cur === k ? " selected" : ""}>${esc(t(v))}</option>`).join("");
+  const all = Object.values(S.duties), nDraft = all.filter(d => d.status === "draft").length, nConf = all.filter(d => d.status === "confirmed").length;
+  const row = d => `<div class="duty ${d.status}"><div class="t">${dutyText(d, esc(t(M.spheres[d.sphere] || d.sphere)) + " · " + esc(t(M.traditions[d.tradition] || d.tradition)) + (d.citation ? " · " + esc(d.citation) : "") + alsoIn(d))}</div>
+    <span class="tag ${d.status}">${t(d.status)}</span>
+    ${d.status !== "confirmed" ? `<button class="btn sm" onclick="dutyStatus(${d.id},'confirmed')">${t("confirm")}</button>` : ""}
+    <button class="btn sm" onclick="dutyDialog(${d.id})">${t("edit")}</button>
+    <button class="btn sm" title="${t("search the books for this")}" onclick="libSearch(S.duties[${d.id}].text)">${t("books")}</button></div>`;
+  $("#way").innerHTML = `<div class="cols"><div style="flex:1.4">
+    <div class="card"><div class="row">
+      <select onchange="wayFilter.from=this.value;drawWay()">${opt(M.roles, wayFilter.from, t("every role"))}</select>
+      <select onchange="wayFilter.trad=this.value;drawWay()">${opt(M.traditions, wayFilter.trad, t("every tradition"))}</select>
+      <select onchange="wayFilter.status=this.value;drawWay()">${opt({draft: "drafts", confirmed: "confirmed", retired: "retired: why we don't"}, wayFilter.status, t("drafts + confirmed"))}</select>
+      <input type="search" placeholder="${t("filter text")}" value="${esc(wayFilter.text)}" onchange="wayFilter.text=this.value;drawWay()">
+      <span class="grow"></span><button class="btn pri" onclick="dutyDialog(null)">${t("+ Duty")}</button></div>
+      <div class="row" style="margin-top:8px"><span class="mute">${t("{n} confirmed · {d} drafts awaiting your word", {n: nConf, d: nDraft})} · ${t("{n} shown", {n: list.length})}</span><span class="grow"></span>
+      <button class="btn sm pri" onclick="wayReview=true;drawWay()">${t("Review the drafts, a few at a time")}</button>
+      <button class="btn sm" onclick="confirmShown()">${t("Confirm all {n} drafts shown", {n: list.filter(d => d.status === "draft").length})}</button></div></div>
+    ${Object.entries(groups).map(([k, ds]) => { const [a, b] = k.split(">"); return `<div class="grp">${esc(t(M.roles[a] || a))} <span class="mute">→</span> ${esc(t(M.roles[b] || b))}</div>` + ds.map(row).join(""); }).join("") || `<p class="mute">${t("Nothing matches.")}</p>`}
+    </div><div><div class="card"><h3>${t("The books")}</h3>
+      <div class="mute" style="font-size:13px;margin:4px 0 8px">${S.library.passages ? t("{p} passages from {b} books and house documents.", {p: S.library.passages, b: S.library.books}) : t("No index yet. Run {cmd}.", {cmd: "<code>./run.sh index</code>"})}</div>
+      <div class="row"><input type="search" id="lq" style="flex:1" placeholder="${t("search the books: duty of a father, 남편, filial…")}" value="${esc(libQ)}"><button class="btn" onclick="libSearch($('#lq').value)">${t("Search")}</button></div>
+      <div id="lhits">${libHits.map((h, i) => `<div class="hit" onclick="this.classList.toggle('open')"><b>${esc(h.book)}</b><span class="mute" style="font-size:12px">${esc(h.heading)}</span>
+        <div class="snip">${esc(h.snippet).replace(/\[\[/g, "<mark>").replace(/\]\]/g, "</mark>")}</div><div class="full">${esc(h.body)}</div>
+        <button class="btn sm" style="margin-top:4px" onclick="event.stopPropagation();dutyDialog(null,${i})">${t("make a duty from this")}</button></div>`).join("") || (libQ ? `<p class="mute">${t("No passage found.")}</p>` : "")}</div></div></div></div>`;
+  $("#lq").onkeydown = e => { if (e.key === "Enter") libSearch(e.target.value); };
+}
+async function libSearch(q) { libQ = q; libHits = (await api("GET", "/api/library?q=" + encodeURIComponent(libQ))).results; drawWay(); }
+async function dutyStatus(id, status) { await api("PUT", "/api/duty/" + id, {status}); await loadState(); await loadEgo(); drawWay(); }
+async function confirmShown() {
+  const ids = wayDuties().filter(d => d.status === "draft").map(d => d.id);
+  if (!ids.length || !confirm(t("Confirm {n} duties as part of The Way?", {n: ids.length}))) return;
+  await api("PUT", "/api/duty", {ids, status: "confirmed"}); await loadState(); await loadEgo(); drawWay();
+}
+function dutyDialog(id, hit) {
+  const M = S.meta, h = hit != null ? libHits[hit] : null;
+  const d = id ? S.duties[id] : {from_role: wayFilter.from || "kin", to_role: "kin", sphere: "honour", tradition: "puritan", citation: h ? h.book.split(" - ")[0] + (h.heading ? ", " + h.heading : "") : "", text: "", status: "confirmed"};
+  const sel_ = (idn, o, cur) => `<select id="${idn}">${Object.entries(o).map(([k, v]) => `<option value="${k}"${cur === k ? " selected" : ""}>${esc(t(v))}</option>`).join("")}</select>`;
+  openDlg(`<h2>${id ? t("Edit duty") : t("New duty")}</h2>
+    ${h ? `<div class="card" style="max-height:180px;overflow:auto;font-size:13px;white-space:pre-wrap">${esc(h.body)}</div>` : ""}
+    <div class="row"><div style="flex:1"><label>${t("Who owes it")}</label>${sel_("d_from", M.roles, d.from_role)}</div><div style="flex:1"><label>${t("To whom")}</label>${sel_("d_to", M.roles, d.to_role)}</div></div>
+    <label>${t("The duty, in one plain line")}</label><textarea id="d_text" rows="3">${esc(d.text)}</textarea>
+    <div class="row"><div style="flex:1"><label>${t("Sphere")}</label>${sel_("d_sphere", M.spheres, d.sphere)}</div><div style="flex:1"><label>${t("Tradition")}</label>${sel_("d_trad", M.traditions, d.tradition)}</div></div>
+    <label>${t("Citation")}</label><input type="text" id="d_cite" value="${esc(d.citation)}">
+    <label>${t("Standing")}</label>${sel_("d_status", {draft: "draft", confirmed: "confirmed (part of The Way)", retired: "retired"}, d.status)}
+    <label>${t("If retired: why the house does not keep it")}</label><textarea id="d_reason" rows="2">${esc(d.reason || "")}</textarea>
+    <label>${t("The commands and standards against it")}</label><input type="text" id="d_counter" value="${esc(d.counter || "")}">
+    ${id && (d.attest || []).length ? `<label>${t("Also recorded in")}</label>${d.attest.map(a => `<div class="row" style="font-size:13px"><span class="grow"><b>${esc(t(S.meta.traditions[a.tradition] || a.tradition))}</b> · ${esc(a.citation)}</span><button class="btn sm" onclick="dropAttest(${a.id},${id})">${t("remove")}</button></div>`).join("")}` : ""}
+    <div class="err" id="f_err"></div>
+    <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn" onclick="dlg.close()">${t("Cancel")}</button><button class="btn pri" onclick="saveDuty(${id})">${t("Save")}</button></div>`);
+}
+async function dropAttest(aid, did) { if (!confirm(t("Remove this attestation?"))) return; await api("DELETE", "/api/attest/" + aid); await loadState(); dutyDialog(did); }
+async function saveDuty(id) {
+  const body = {from_role: $("#d_from").value, to_role: $("#d_to").value, text: $("#d_text").value.trim(), sphere: $("#d_sphere").value,
+    tradition: $("#d_trad").value, citation: $("#d_cite").value.trim(), status: $("#d_status").value,
+    reason: $("#d_reason").value.trim(), counter: $("#d_counter").value.trim()};
+  try { await api(id ? "PUT" : "POST", "/api/duty" + (id ? "/" + id : ""), body); dlg.close(); await loadState(); await loadEgo(); drawWay(); } catch (e) { fail(e); }
+}
+
+/* ---------- clan ---------- */
+/* matters before the family: what was done, in the order Matt 18:15-17 gives, and how it ended */
+const matterLine = m => `<div class="duty" style="cursor:pointer" onclick="matterDialog(${m.id})"><div class="t"><span>${m.other_id ? t("{a} and {b}", {a: `<b>${esc(nm(m.person_id))}</b>`, b: esc(nm(m.other_id))}) : `<b>${esc(nm(m.person_id))}</b>`}: ${esc(m.title)}</span>
+  <span class="src">${esc(t(S.meta.matter_kinds[m.kind] || m.kind))} · ${m.steps.length ? m.steps.map(x => esc(t(S.meta.steps[x.step] || x.step))).join(" → ") : t("nothing done yet")}</span></div>
+  <span class="tag ${m.status === "open" ? "draft" : m.status === "cut_off" ? "retired" : "confirmed"}">${esc(t(S.meta.matter_states[m.status] || m.status))}</span></div>`;
+function matterCard() {
+  const ms = S.matters || [], open = ms.filter(m => m.status === "open"), closed = ms.filter(m => m.status !== "open");
+  return `<div class="card"><div class="row"><h3 class="grow" style="margin:0">${t("Matters before the family")}</h3><button class="btn sm" onclick="matterDialog(null, egoId)">${t("Open a matter")}</button></div>
+    <p class="mute" style="margin:4px 0 6px;font-size:13px">${t("A fault, a dispute, one drifting away, or whether to cut one off: what was done, by whom, and how it ended. First privately, then with one or two witnesses, then before the family (Matt 18:15–17).")}</p>
+    ${open.map(matterLine).join("") || `<p class="mute">${t("No open matter.")}</p>`}
+    ${closed.length ? `<details><summary class="mute">${t("{n} closed", {n: closed.length})}</summary>${closed.map(matterLine).join("")}</details>` : ""}</div>`;
+}
+function matterDialog(id, about) {
+  const m = id ? S.matters.find(x => x.id === id) : {person_id: about || null, other_id: null, kind: "fault", title: "", status: "open", outcome: "", steps: []};
+  const M = S.meta, fam = Object.values(S.people).filter(p => !dead(p)).sort((a, b) => a.name.localeCompare(b.name));
+  const opts = (cur, none) => (none ? `<option value="">${none}</option>` : "") + fam.map(p => `<option value="${p.id}"${cur === p.id ? " selected" : ""}>${esc(p.name)}${yr(p) ? " " + t("(b. {year})", {year: yr(p)}) : ""}</option>`).join("");
+  const done = new Set(m.steps.map(x => x.step)), next = ["private", "witnesses", "family", "decision"].find(x => !done.has(x)) || "note";
+  openDlg(`<h2>${id ? t("Matter before the family") : t("Open a matter before the family")}</h2>
+    <div class="row"><div style="flex:1"><label>${t("Concerning")}</label><select id="m_person">${opts(m.person_id, t("choose…"))}</select></div>
+      <div style="flex:1"><label>${t("And (in a dispute)")}</label><select id="m_other">${opts(m.other_id, t("no one else"))}</select></div></div>
+    <div class="row"><div style="flex:1"><label>${t("Kind")}</label><select id="m_kind">${Object.entries(M.matter_kinds).map(([k, v]) => `<option value="${k}"${m.kind === k ? " selected" : ""}>${esc(t(v))}</option>`).join("")}</select></div>
+      <div style="flex:1"><label>${t("State")}</label><select id="m_status">${Object.entries(M.matter_states).map(([k, v]) => `<option value="${k}"${m.status === k ? " selected" : ""}>${esc(t(v))}</option>`).join("")}</select></div></div>
+    <label>${t("What it is, in a few words")}</label><input type="text" id="m_title" value="${esc(m.title)}">
+    <label>${t("How it ended (the decision, and its grounds)")}</label><textarea id="m_outcome" rows="2">${esc(m.outcome)}</textarea>
+    ${id ? `<h3 style="margin:14px 0 4px">${t("What was done")}</h3>
+      ${m.steps.map(x => `<div class="duty"><div class="t"><span><b>${esc(t(M.steps[x.step] || x.step))}</b>${x.day ? " · " + esc(x.day) : ""}${x.by_ids.length ? " · " + t("by {names}", {names: x.by_ids.map(nm).map(esc).join(", ")}) : ""}</span><span class="src">${esc(x.text)}</span></div>
+        <button class="btn sm" onclick="confirm(t('Remove this step?'))&&api('DELETE','/api/matter_step/${x.id}').then(()=>loadState()).then(()=>matterDialog(${id}))">${t("remove")}</button></div>`).join("") || `<p class="mute">${t("Nothing recorded yet.")}</p>`}
+      <div class="card" style="margin-top:8px"><div class="row"><div><label>${t("Step")}</label><select id="s_step">${Object.entries(M.steps).map(([k, v]) => `<option value="${k}"${k === next ? " selected" : ""}>${esc(t(v))}</option>`).join("")}</select></div>
+        <div><label>${t("When (YYYY-MM-DD)")}</label><input type="text" id="s_day" style="width:120px" value="${new Date().toISOString().slice(0, 10)}"></div></div>
+        <label>${t("By whom (hold Ctrl to choose several)")}</label><select id="s_by" multiple size="4" style="width:100%">${opts(null)}</select>
+        <label>${t("What was said and done")}</label><textarea id="s_text" rows="2"></textarea>
+        <div class="row" style="justify-content:flex-end"><button class="btn" onclick="addStep(${id})">${t("Record this step")}</button></div></div>` : ""}
+    <div class="row" style="justify-content:space-between;margin-top:10px">
+      <span>${id ? `<button class="btn" onclick="confirm(t('Delete this matter and its record?'))&&api('DELETE','/api/matter/${id}').then(()=>{dlg.close();return refresh()})">${t("Delete")}</button>` : ""}</span>
+      <span><button class="btn" onclick="dlg.close()">${t("Close")}</button> <button class="btn pri" onclick="saveMatter(${id || "null"})">${t("Save")}</button></span></div>`);
+}
+async function saveMatter(id) {
+  const body = {person_id: +$("#m_person").value || null, other_id: +$("#m_other").value || null, kind: $("#m_kind").value,
+    status: $("#m_status").value, title: $("#m_title").value.trim(), outcome: $("#m_outcome").value.trim()};
+  try {
+    const was = id ? S.matters.find(x => x.id === id).status : "open";
+    const r = await api(id ? "PUT" : "POST", "/api/matter" + (id ? "/" + id : ""), body);
+    const p = P(body.person_id), to = {cut_off: "cut_off", restored: "member"}[body.status];
+    if (to && was !== body.status && p && (p.standing || "member") !== to
+        && confirm(t("Also set {name}'s standing in the family to \"{standing}\"?", {name: p.name, standing: t(S.meta.standings[to] || to)})))
+      await api("PUT", "/api/person/" + p.id, {standing: to});
+    await refresh(); matterDialog(id || r.id);
+  } catch (e) { alert(e.message); }
+}
+async function addStep(id) {
+  const by = [...$("#s_by").selectedOptions].map(o => +o.value);
+  try { await api("POST", "/api/matter_step", {matter_id: id, step: $("#s_step").value, day: $("#s_day").value.trim(), by_ids: by, text: $("#s_text").value.trim()});
+    await loadState(); matterDialog(id); } catch (e) { alert(e.message); }
+}
+
+/* what is missing in the record: the headship and duty logic is only as good as these */
+function missingCard() {
+  const Y = new Date().getFullYear(), parents = {};
+  for (const l of S.links) (parents[l.child_id] ||= []).push(l.parent_id);
+  const people = Object.values(S.people).filter(p => (p.standing || "member") !== "outside");
+  const fam = people.filter(p => !dead(p) && ofFamily(p.id));
+  const forebears = new Set();                           // every living member's forebears to the fourth generation
+  for (const p of fam) { let gen = [p.id]; for (let i = 0; i < 4; i++) { gen = gen.flatMap(x => parents[x] || []); gen.forEach(x => forebears.add(x)); } }
+  const groups = [
+    [t("Placeholders to name"), t("a stand-in added until the real person is known"), people.filter(p => /placeholder|not yet known/i.test(p.notes || "") || /^(husband|wife|child|son|daughter)( \d+)? of |^\(unnamed\)$/i.test(p.name))],
+    [t("No birth year"), t("decides who is a minor, who is aged, and how brothers-in-law rank"), fam.filter(p => !yr(p))],
+    [t("Sex not recorded"), t("decides headship and many roles"), people.filter(p => !p.sex || p.sex === "u")],
+    [t("Died, date unknown"), t("recorded as dead with no date"), people.filter(p => p.death === "?")],
+    [t("Minors with no guardian named"), t("who takes them if their parents die"), fam.filter(p => +yr(p) && Y - +yr(p) < 18 && !p.guardian_id)],
+    [t("Forebears whose grave is not recorded"), t("within four generations of a living member"), [...forebears].map(P).filter(p => p && dead(p) && !(p.burial || "").trim())],
+  ].filter(g => g[2].length);
+  if (!groups.length) return `<div class="card"><h3>${t("What is missing")}</h3><p class="mute">${t("Nothing: every record the logic depends on is filled in.")}</p></div>`;
+  return `<div class="card"><h3>${t("What is missing")}</h3><p class="mute" style="margin:4px 0 8px;font-size:13px">${t("The headship, roles and duties are worked out from these records. Click a name to fill it in.")}</p>
+    ${groups.map(([title, why, ps]) => `<details><summary><b>${esc(title)}</b> (${ps.length}) <span class="mute">· ${esc(why)}</span></summary><div style="margin:6px 0 8px 14px">${ps.sort((a, b) => a.name.localeCompare(b.name)).map(p => `<a href="#" onclick="personDialog(${p.id});return false">${esc(p.name)}</a>${yr(p) ? ` <span class="mute">(${esc(life(p))})</span>` : ""}`).join(" · ")}</div></details>`).join("")}</div>`;
+}
+async function drawClan() {
+  const R = await api("GET", "/api/rollup"), M = S.meta, c = R.bond_counts;
+  const judged = Object.values(c).reduce((a, b) => a + b, 0);
+  const bar = v => { const n = v.kept + (v.poorly || 0) + v.failing || 1; return `<span class="bar"><i style="width:${100 * v.kept / n}%;background:var(--kept)"></i><i style="width:${100 * (v.poorly || 0) / n}%;background:var(--strained)"></i><i style="width:${100 * v.failing / n}%;background:var(--broken)"></i></span>`; };
+  const tally = v => `${t("{n} kept", {n: v.kept})} · ${t("{n} not doing well", {n: v.poorly || 0})} · ${t("{n} failing", {n: v.failing})}`;
+  const nState = (n, k) => k === "kept" ? t("{n} kept", {n}) : k === "strained" ? t("{n} strained", {n}) : k === "broken" ? t("{n} broken", {n}) : t("{n} severed", {n});
+  const members = h => Object.values(S.people).filter(p => p.household_id === h.id);
+  $("#clan").innerHTML = attentionTiles(R) + matterCard() + missingCard() + `<div class="cols"><div>
+    <div class="card torn"><h3>${t("State of the bonds")}</h3>
+      <p>${judged ? ["kept", "strained", "broken", "severed"].map(k => `<span class="chip on ${k}">${nState(c[k] || 0, k)}</span>`).join(" ") : `<span class="mute">${t("No bond has been judged yet. Open a person on Stand here and set the state of the bond.")}</span>`}</p>
+      ${R.torn.map(x => `<div class="duty" style="cursor:pointer" onclick="standAs(${x.a}).then(()=>{sel=${x.b};draw();panel()})"><div class="t"><span>${esc(nm(x.a))} → ${esc(nm(x.b))}</span><span class="src">${esc(x.note)}</span></div><span class="chip on ${x.state}">${t(x.state)}</span></div>`).join("")}</div>
+    <div class="card failing"><h3>${t("Duties failing or not doing well")}</h3>${R.failing.map(f => `<div class="duty" style="cursor:pointer" onclick="standAs(${f.person}).then(()=>{sel=${f.toward || "null"};draw();panel()})"><div class="t"><span>${f.toward ? t("{a} toward {b}", {a: esc(nm(f.person)), b: esc(nm(f.toward))}) : esc(nm(f.person))}</span><span class="src">${esc(dtext(S.duties[f.duty]))}</span></div><span class="tag" style="color:var(--${f.state === "failing" ? "broken" : "strained"});border-color:currentColor">${f.state === "failing" ? t("failing") : t("not doing well")}</span></div>`).join("") || `<p class="mute">${t("None marked.")}</p>`}</div>
+    </div><div>
+    <div class="card"><h3>${t("By sphere")}</h3><table>${Object.keys(M.spheres).map(k => { const v = R.per_sphere[k] || {kept: 0, poorly: 0, failing: 0}; return `<tr><td>${esc(t(M.spheres[k]))}</td><td>${bar(v)}</td><td>${tally(v)}</td></tr>`; }).join("")}</table></div>
+    <div class="card"><h3>${t("By person")}</h3>${Object.keys(R.per_person).length ? `<table>${Object.entries(R.per_person).sort((a, b) => b[1].failing - a[1].failing || (b[1].poorly || 0) - (a[1].poorly || 0)).map(([id, v]) => `<tr><td style="cursor:pointer" onclick="standAs(${id})">${esc(nm(id))}</td><td>${bar(v)}</td><td>${tally(v)}</td></tr>`).join("")}</table>` : `<p class="mute">${t("No duties marked yet.")}</p>`}</div>
+    <div class="card"><h3>${t("Households")}</h3>
+      ${S.households.map(h => `<div class="duty"><div class="t"><span>${esc(h.name)}</span><span class="src">${t("head: {name}", {name: h.head_id ? esc(nm(h.head_id)) : t("none set")})} · ${members(h).map(p => esc(p.name)).join(", ") || t("no members yet (set in a person’s Edit)")}</span></div>
+        ${E ? `<button class="btn sm" onclick="api('PUT','/api/household/${h.id}',{head_id:${egoId}}).then(refresh).catch(e=>alert(e.message))">${t("make {name} head", {name: esc(nm(egoId))})}</button>` : ""}
+        <button class="btn sm" onclick="confirm(t('Remove this household?'))&&api('DELETE','/api/household/${h.id}').then(refresh)">${t("remove")}</button></div>`).join("")}
+      <div class="row" style="margin-top:8px"><input type="text" id="hname" placeholder="${t("new household name")}"><button class="btn" onclick="$('#hname').value.trim()&&api('POST','/api/household',{name:$('#hname').value.trim()}).then(refresh)">${t("Add")}</button></div></div>
+    <div class="card"><h3>${t("Head of the family")}</h3>
+      ${S.head != null ? `<p><b style="cursor:pointer" onclick="standAs(${S.head})">${esc(nm(S.head))}</b> <span class="mute">· ${S.head_named ? t("named by you") : t("by rule: the senior living man of the father’s line (oldest living generation, eldest first)")}</span></p>`
+        : `<p class="mute">${S.me ? t("No living man found on the father’s line.") : t("No living man found on the father’s line. Press “This is me” on your own page so the line can be traced from you.")}</p>`}
+      <div class="row">${E && P(egoId).sex === "m" && !dead(P(egoId)) && egoId !== S.head ? `<button class="btn sm" onclick="setSetting('clan_elder',${egoId})">${t("name {name} as Head", {name: esc(nm(egoId))})}</button>` : ""}
+        ${S.head_named ? `<button class="btn sm" onclick="setSetting('clan_elder',null)">${t("return to the rule")}</button>` : ""}</div>
+      ${succession(S.succession, t("Order of succession to the Head of the family"))}
+      <p class="mute" style="font-size:13px;margin-bottom:0">${t("There is always one man at the head. If the named Head dies, the rule takes over until you name another.")}
+        ${t("Every house is likewise under a living man: the husband; then the man whose household one lives in; for a widow, her grown sons; for the unmarried, the father, then the eldest brother. A man who steps down or abandons his family is passed over: the next in the order acts, and he still owes what he left.")}</p></div>
+    </div></div>
+    <div class="card"><h3>${t("Standing in the family")}</h3>${Object.values(S.people).filter(p => standing(p)).map(p => `<div class="duty" style="cursor:pointer" onclick="openToward(${p.id})"><div class="t"><span>${esc(p.name)}</span><span class="src">${esc(p.standing_date || "")} ${esc(p.standing_note || "")}</span></div>${stBadge(p)}</div>`).join("") || `<p class="mute">${t("Everyone on record is a member in full standing. Set a person’s standing from their panel on Stand here.")}</p>`}
+      <div class="row" style="margin-top:8px"><button class="btn sm" onclick="showTab('map');render()">${t("Open the family map")}</button></div></div>`;
+}
+/* ---------- rulings: practices the house questions or will not keep, with the case against each ---------- */
+let rulingFilter = {status: "proposed", cat: ""};
+const RCAT = {ancestral_rite: "Rites for the dead", saint_cult: "Saints, images and prayers for the dead", divination: "Divination and omens",
+  contested: "Contested practices", conflict: "Where the traditions disagree", house: "Our house protocols under judgment",
+  review: "Duties the newly read books question"};
+const RST = {proposed: "awaiting your word", accepted: "accepted: not kept", kept: "kept after all", revise: "needs work", rejected: "case rejected"};
+function drawRulings() {
+  const all = S.rulings || [], M = S.meta;
+  const n = st => all.filter(r => r.status === st).length;
+  const list = all.filter(r => (!rulingFilter.status || r.status === rulingFilter.status) && (!rulingFilter.cat || r.category === rulingFilter.cat));
+  const opt = (o, cur, any) => `<option value="">${any}</option>` + Object.entries(o).map(([k, v]) => `<option value="${k}"${cur === k ? " selected" : ""}>${esc(t(v))}</option>`).join("");
+  const trad = x => esc(t(M.traditions[x] || x));
+  const ACT = {keep: "keep it, with these sources as its record", revise: "revise it to the wording below", retire: "retire it, with these reasons"};
+  const house = r => `<div class="card ruling" id="ruling${r.id}">
+    <div class="row"><h3 class="grow">${esc(rtext(r, "practice"))}</h3><span class="tag">${esc(t(RCAT[r.category] || RCAT.house))}</span><span class="tag ${r.status}">${esc(t(RST[r.status] || r.status))}</span></div>
+    <p class="mute" style="margin:4px 0 0">${esc(rtext(r, "question"))} <span class="mute">(${esc(t(M.roles[r.from_role] || r.from_role))} → ${esc(t(M.roles[r.to_role] || r.to_role))})</span></p>
+    <div class="rsec"><div class="rhead">${t("What the literature says")}</div><div><b class="verdict v-${esc((r.verdict || "").replace(/ /g, "-"))}">${esc(t(r.verdict || "not judged"))}</b></div>
+      ${r.grounds.map((g, i) => `<div class="ground"><span class="stance ${g.stance}">${g.stance === "against" ? t("cuts against") : t("supports")}</span>${g.point ? ` ${esc(gpoint(r, i))}` : ""}<blockquote>${esc(g.quote)}<cite>${trad(g.tradition)} · ${esc(g.citation)}</cite></blockquote></div>`).join("") || `<p class="mute">${t("No passage in the library speaks to it.")}</p>`}</div>
+    <div class="rsec"><div class="rhead">${t("Proposed")}</div><div style="margin-bottom:6px">${esc(ACT[r.action] ? t(ACT[r.action]) : t("no action proposed"))}</div>
+      <label class="mute" style="font-size:12px">${t("Revision (used when the action is revise)")}</label><textarea id="rrev${r.id}" rows="2" style="width:100%">${esc(rtext(r, "revision"))}</textarea>
+      <label class="mute" style="font-size:12px">${t("Reasoning")}</label><textarea id="rres${r.id}" rows="3" style="width:100%">${esc(rtext(r, "resolution"))}</textarea>
+      <textarea id="rnote${r.id}" rows="2" style="width:100%;margin-top:6px" placeholder="${t("your note")}">${esc(r.note)}</textarea></div>
+    <div class="row" style="margin-top:8px">
+      <select id="ract${r.id}">${["keep", "revise", "retire"].map(a => `<option value="${a}"${r.action === a ? " selected" : ""}>${t(a)}</option>`).join("")}</select>
+      <button class="btn pri" onclick="decideRuling(${r.id},'accepted')">${t("Apply")}</button>
+      <button class="btn" onclick="decideRuling(${r.id},'kept')" title="${t("leave the duty exactly as written")}">${t("Keep as written")}</button>
+      <button class="btn" onclick="decideRuling(${r.id},'revise')">${t("Needs work")}</button></div></div>`;
+  const card = r => r.category === "house" || r.category === "review" ? house(r) : `<div class="card ruling" id="ruling${r.id}">
+    <div class="row"><h3 class="grow">${esc(rtext(r, "topic"))}</h3><span class="tag">${esc(t(RCAT[r.category] || r.category))}</span><span class="tag ${r.status}">${esc(t(RST[r.status] || r.status))}</span></div>
+    ${r.question ? `<p class="mute" style="margin:4px 0 0">${esc(rtext(r, "question"))}</p>` : ""}
+    <div class="rsec"><div class="rhead">${t("The practice")}</div><div>${esc(rtext(r, "practice"))} <span class="mute" style="font-size:12px">(${esc(t(M.roles[r.from_role] || r.from_role))} → ${esc(t(M.roles[r.to_role] || r.to_role))})</span></div>
+      <details class="prov"><summary>${r.held_by.length === 1 ? t("Taught in {n} place", {n: r.held_by.length}) : t("Taught in {n} places", {n: r.held_by.length})}</summary>${r.held_by.map(h => `<div><b>${trad(h.tradition)}</b> · ${esc(h.citation)}${h.quote ? `<q>${esc(h.quote)}</q>` : ""}</div>`).join("")}</details></div>
+    <div class="rsec"><div class="rhead">${t("The grounds")}</div>${r.verdict ? `<div><b class="verdict v-${esc(r.verdict.replace(/ /g, "-"))}">${esc(t(r.verdict))}</b></div>` : ""}${r.grounds.map((g, i) => `<div class="ground"><span class="stance ${g.stance === "for" ? "support" : "against"}">${g.stance === "for" ? t("for keeping it") : t("against it")}</span>${g.point ? ` ${esc(gpoint(r, i))}` : ""}<blockquote>${esc(g.quote)}<cite>${trad(g.tradition)} · ${esc(g.citation)}</cite></blockquote></div>`).join("") || `<p class="mute">${t("No sourced grounds yet.")}</p>`}</div>
+    ${r.allowed ? `<div class="rsec"><div class="rhead">${t("Still permitted")}</div><div>${esc(rtext(r, "allowed"))}</div></div>` : ""}
+    <div class="rsec"><div class="rhead">${t("Proposed ruling")}</div><textarea id="rres${r.id}" rows="4" style="width:100%">${esc(rtext(r, "resolution"))}</textarea>
+      <textarea id="rnote${r.id}" rows="2" style="width:100%;margin-top:6px" placeholder="${t("your note (what to change, what is missing)")}">${esc(r.note)}</textarea></div>
+    <div class="row" style="margin-top:8px">
+      ${r.verdict === "keep"
+        ? `<button class="btn pri" onclick="decideRuling(${r.id},'kept')" title="${t("the house keeps this practice; it becomes a draft duty")}">${t("Accept: we keep this")}</button>
+      <button class="btn" onclick="decideRuling(${r.id},'accepted')" title="${t("the house will not keep this practice after all; it becomes a retired duty carrying this ruling")}">${t("Set it aside after all")}</button>`
+        : `<button class="btn pri" onclick="decideRuling(${r.id},'accepted')" title="${r.verdict === "keep in part" ? t("the house will not keep this practice (what is still permitted is recorded with it); it becomes a retired duty carrying this ruling and these grounds") : t("the house will not keep this practice; it becomes a retired duty carrying this ruling and these grounds")}">${r.verdict === "keep in part" ? t("Accept: we do not keep this as taught") : t("Accept: we do not keep this")}</button>
+      <button class="btn" onclick="decideRuling(${r.id},'kept')" title="${t("the house keeps the practice after all; it becomes a draft duty")}">${t("Keep it after all")}</button>`}
+      <button class="btn" onclick="decideRuling(${r.id},'revise')">${t("Needs work")}</button>
+      <button class="btn" onclick="decideRuling(${r.id},'rejected')" title="${t("this case is mistaken or not worth keeping")}">${t("Reject the case")}</button>
+      <span class="grow"></span>${r.duty_id && S.duties[r.duty_id] ? `<a href="#" onclick="wayFilter={from:'',trad:'',status:'${S.duties[r.duty_id].status}',text:${esc(JSON.stringify(r.practice.slice(0, 40)))}};showTab('way');render();return false">${t("see the duty")}</a>` : ""}</div></div>`;
+  $("#rulings").innerHTML = `<div class="card"><h2 style="font-size:20px">${t("Rulings")}</h2>
+    <p style="margin:6px 0">${t("Practices our traditions teach that the house questions or will not keep, and points where the traditions disagree.")}
+      ${t("Each case gives where the practice is taught, and the case against it in the words of Scripture and the stronger traditions, every quotation checked against its source.")}
+      ${t("Accepting a ruling retires the practice with these reasons, so the family can later see both where it came from and why it is set aside.")}</p>
+    <div class="row"><select onchange="rulingFilter.status=this.value;drawRulings()">${opt(RST, rulingFilter.status, t("every decision"))}</select>
+      <select onchange="rulingFilter.cat=this.value;drawRulings()">${opt(RCAT, rulingFilter.cat, t("every kind"))}</select>
+      <span class="mute">${t("{n} awaiting your word", {n: n("proposed")})} · ${t("{n} accepted", {n: n("accepted")})} · ${t("{n} kept", {n: n("kept")})} · ${t("{n} need work", {n: n("revise")})} · ${t("{n} shown", {n: list.length})}</span></div></div>
+    ${list.map(card).join("") || `<p class="mute">${all.length ? t("Nothing here.") : t("No rulings yet: they arrive when the sources are mined.")}</p>`}`;
+}
+async function decideRuling(id, status) {
+  try {
+    const body = {status, resolution: $("#rres" + id).value, note: $("#rnote" + id).value};
+    if ($("#rrev" + id)) { body.revision = $("#rrev" + id).value; body.action = $("#ract" + id).value; }
+    await api("PUT", "/api/ruling/" + id, body);
+    await loadState(); await loadEgo(); drawRulings();
+  } catch (e) { alert(e.message); }
+}
+
+/* ---------- print ---------- */
+function printSheet() {
+  const withMarks = confirm(t("Include the assessments (bond states and marks) on the sheet?\n\nOK = include.  Cancel = position and duties only."));
+  const ego = E.ego, ids = shown().sort((a, b) => E.rels[a].them.path.length - E.rels[b].them.path.length || rank(a) - rank(b));
+  const plain = (dutyIds, marks) => { const by = {};
+    for (const id of dutyIds) { const d = S.duties[id]; if (d && d.status === "confirmed") (by[d.sphere] ||= []).push(d); }
+    return Object.keys(S.meta.spheres).filter(k => by[k]).map(k => `<div class="duty"><b>${esc(t(S.meta.spheres[k]))}.</b> ` + by[k].map(d => esc(dtext(d)) + (d.citation ? ` <small>(${esc(d.citation)})</small>` : "") + (withMarks && marks && marks[d.id] ? ` <b>[${markLabel(marks[d.id].state)}]</b>` : "")).join(" ") + `</div>`).join(""); };
+  const collective = plain(E.collective, E.marks_collective);
+  $("#sheet").innerHTML = `<h1>${esc(ego.name)} ${ego.ko_name ? esc(ego.ko_name) : ""}</h1><div>${t("Where you stand in the family, and what is owed.")} ${new Date().toISOString().slice(0, 10)}</div>
+    <h2>${t("Your place")}</h2><div>${ids.map(id => `${esc(nm(id))} (${esc(E.rels[id].them.en.split(" (")[0])}${native(E.rels[id].them) ? ", " + esc(native(E.rels[id].them)) : ""})`).join(" · ")}</div>
+    ${collective ? `<h2>${t("To the house and the clan")}</h2>${collective}` : ""}
+    ${ids.map(id => { const r = E.rels[id], a = plain(r.owe, r.marks_out), b = plain(r.owed, r.marks_in);
+      if (!a && !b) return "";
+      return `<h2>${t("{name}, your {rel}", {name: esc(nm(id)), rel: esc(r.them.en.split(" (")[0])})}${withMarks && r.bond_out ? ` <small>${t("[bond: {state}]", {state: t(r.bond_out.state)})}</small>` : ""}</h2>${a ? `<div><i>${t("You owe:")}</i></div>${a}` : ""}${b ? `<div><i>${t("You are owed:")}</i></div>${b}` : ""}`; }).join("")}`;
+  if (!$("#sheet").querySelector(".duty")) alert(t("No confirmed duties apply yet. Only confirmed duties are printed; confirm them in The Way first."));
+  else window.print();
+}
+
+/* a head's charge: who is under his headship and in his care, with room for notes, to print */
+function printCharge(id) {
+  if (!E || egoId !== id) return alert(t("Stand as this person first."));
+  const me = P(id), living = Object.values(S.people).filter(p => !dead(p) && p.id !== id && ofFamily(p.id)), top = theHead();
+  const rel = k => E.rels[k] ? E.rels[k].them.en.split(" (")[0] : "";
+  const near = (a, b) => (E.rels[a].them.path.length - E.rels[b].them.path.length) || ((P(a).birth || "9") < (P(b).birth || "9") ? -1 : 1);
+  const age = p => { const y = +yr(p); return y ? `${y}${y > new Date().getFullYear() - 18 ? " · " + t("minor") : ""}` : ""; };
+  const stand = p => [p.standing && p.standing !== "member" ? t(S.meta.standings[p.standing] || p.standing) : "", p.headship ? t(S.meta.headship[p.headship]) : ""].filter(Boolean).join(" · ");
+  const row = (k, extra) => { const p = P(k);
+    return `<tr><td><b>${esc(p.name)}</b>${p.ko_name ? " " + esc(p.ko_name) : ""}<div class="small">${esc([rel(k), age(p), stand(p)].filter(Boolean).join(" · "))}</div>${extra ? `<div class="small">${extra}</div>` : ""}</td><td class="notes"></td></tr>`; };
+  const table = (ids, extra) => `<table class="charge"><tr><th>${t("Who")}</th><th>${t("Notes")}</th></tr>${ids.sort(near).map(k => row(k, extra && extra(k))).join("")}</table>`;
+  const bound = living.filter(p => S.bound[p.id] && S.bound[p.id].by === id).map(p => p.id);
+  const house = living.filter(p => S.heads[p.id] === id && !bound.includes(p.id)).map(p => p.id);
+  const carried = living.filter(p => p.carried_by === id && !house.includes(p.id) && !bound.includes(p.id)).map(p => p.id);
+  const actingFor = k => k in S.heads_right && S.heads_right[k] != null && S.heads_right[k] !== id ? `${t("acting in the place of {name}", {name: esc(nm(S.heads_right[k]))})}${P(S.heads_right[k]).headship ? " (" + esc(t(S.meta.headship[P(S.heads_right[k]).headship])) + ")" : ""}` : "";
+  const headsUnder = id === top ? living.filter(p => S.heads[p.id] === p.id).map(p => p.id) : [];
+  const leftToHead = id === top ? living.filter(p => S.heads[p.id] == null).map(p => p.id) : [];
+  const memberCount = k => living.filter(p => S.heads[p.id] === k && p.id !== k).length;
+  const above = [S.heads[id] != null && S.heads[id] !== id ? t("the head of your house, {name}", {name: esc(nm(S.heads[id]))}) : "", top != null && top !== id ? t("the Head of the family, {name}", {name: esc(nm(top))}) : ""].filter(Boolean);
+  if (!house.length && !bound.length && !carried.length && !headsUnder.length && !leftToHead.length)
+    return alert(me.sex === "f" ? t("No one is under {name}'s headship or in her care.", {name: me.name}) : t("No one is under {name}'s headship or in his care.", {name: me.name}));
+  $("#sheet").innerHTML = `<h1>${t("{name}: those in your charge", {name: esc(me.name) + (me.ko_name ? " " + esc(me.ko_name) : "")})}</h1>
+    <div class="small">${id === top ? t("Head of the family") + " · " : ""}${S.heads[id] === id ? t("head of his own house") + " · " : ""}${above.length ? (above.length > 1 ? t("You answer to {a} and {b}", {a: above[0], b: above[1]}) : t("You answer to {a}", {a: above[0]})) + " · " : ""}${new Date().toISOString().slice(0, 10)}</div>
+    ${house.length ? `<h2>${t("Under your headship: your house ({n})", {n: house.length})}</h2>${table(house, actingFor)}` : ""}
+    ${bound.length ? `<h2>${t("In your care: houses with no man of their own line, bound to you by kinship ({n})", {n: bound.length})}</h2>${table(bound, k => S.bound[k].by === S.bound[k].via ? t("you are the nearest kinsman") : t("through {name}, head of the house", {name: esc(nm(S.bound[k].via))}))}` : ""}
+    ${carried.length ? `<h2>${t("In your care: those you carry ({n})", {n: carried.length})}</h2>${table(carried, k => P(k).carried_note ? esc(P(k).carried_note) : "")}` : ""}
+    ${headsUnder.length ? `<h2>${t("Under your headship as Head of the family: the heads of its houses ({n})", {n: headsUnder.length})}</h2>${table(headsUnder, k => memberCount(k) ? t("{n} in his house", {n: memberCount(k)}) : "")}` : ""}
+    ${leftToHead.length ? `<h2>${t("Under the Head of the family directly: in a headless house with no kinsman bound to it ({n})", {n: leftToHead.length})}</h2>${table(leftToHead)}` : ""}
+    <h2>${t("Notes")}</h2><div class="notebox"></div>`;
+  window.print();
+}
+
+/* if he dies: who takes up each house he heads or keeps, the next Head of the family, minors without a guardian */
+async function ifDies(id) {
+  let r; try { r = await api("GET", "/api/ifdies?id=" + id); } catch (e) { return alert(e.message); }
+  const name = k => k == null ? `<b>${t("no one: the Head of the family")}</b>` : esc(nm(k)) + (shared(k) && yr(P(k)) ? ` <span class="mute">${t("(b. {year})", {year: yr(P(k))})}</span>` : "");
+  const by = {}, own = r.changes.filter(c => c.after === c.id);
+  for (const c of r.changes) if (c.after !== c.id) (by[c.after ?? "none"] ||= []).push(c);
+  openDlg(`<h2>${t("If {name} dies", {name: esc(nm(id))})}</h2>
+    <p class="mute" style="margin-top:0">${t("Worked out by the same rules the family uses now; nothing is changed.")}</p>
+    <p>${t("Head of the family: {who}", {who: r.head_before === r.head_after ? t("{name} (unchanged)", {name: name(r.head_after)}) : t("{a} takes the place of {b}", {a: `<b>${name(r.head_after)}</b>`, b: name(r.head_before)})})}</p>
+    ${own.length ? `<div class="sect"><h3>${t("Become heads of their own houses")}</h3><div>${own.map(c => name(c.id)).join(" · ")}</div></div>` : ""}
+    ${Object.entries(by).map(([h, cs]) => `<div class="sect"><h3>${t("Under {who}", {who: h === "none" ? t("no man: the Head of the family") : name(+h)})}</h3>
+      <div>${cs.map(c => `${name(c.id)}${c.bound ? ` <span class="mute">${t("(bound by kinship)")}</span>` : ""}${c.minor ? (c.guardian ? ` <span class="tag confirmed">${t("minor · guardian named: {name}", {name: esc(nm(c.guardian))})}</span>` : ` <span class="tag draft">${t("minor · no guardian named")}</span>`) : ""}`).join(" · ")}</div></div>`).join("")}
+    ${!r.changes.length ? `<p>${t("No one's headship changes.")}</p>` : ""}
+    ${r.minors_unguarded.length ? `<p style="margin-top:10px"><b>${r.minors_unguarded.length > 1 ? t("{n} minors with no guardian named.", {n: r.minors_unguarded.length}) : t("{n} minor with no guardian named.", {n: r.minors_unguarded.length})}</b> ${t("A parent names one in his will (Edit the child to record it).")}</p>` : ""}
+    <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" onclick="window.print()">${t("Print")}</button> <button class="btn pri" onclick="dlg.close()">${t("Close")}</button></div>`);
+  $("#sheet").innerHTML = dlg.innerHTML.replace(/<button[^>]*>.*?<\/button>/g, "");
+}
+
+/* the register of a house to the fourth generation, and the graves of the family, to print and hand down */
+function printRegister(id) {
+  if (!E || egoId !== id) return alert(t("Stand as this person first."));
+  const me = P(id), gen = {P: "Parents", PP: "Grandparents", PPP: "Great-grandparents", PPPP: "Great-great-grandparents"};
+  const rels = Object.entries(E.rels).map(([k, r]) => [+k, r.them]);
+  const dates = p => esc(life(p) || t("dates not recorded"));
+  const row = (k, extra) => { const p = P(k); return `<tr><td><b>${esc(p.name)}</b>${p.ko_name ? " " + esc(p.ko_name) : ""}<div class="small">${esc(extra || "")}</div></td><td>${dates(p)}</td>
+    <td>${dead(p) ? (p.burial ? esc(p.burial) : `<span class="small">${t("grave not recorded")}</span>`) : `<span class="small">${t("living")}</span>`}</td><td class="notes"></td></tr>`; };
+  const table = rows => `<table class="charge"><tr><th>${t("Name")}</th><th>${t("Dates")}</th><th>${t("Grave")}</th><th>${t("Notes")}</th></tr>${rows.join("")}</table>`;
+  const up = Object.keys(gen).map(g => [g, rels.filter(([k, x]) => x.path === g).map(([k, x]) => k)]).filter(([g, ks]) => ks.length);
+  const down = rels.filter(([k, x]) => /^S?C{1,2}$/.test(x.path) || x.path === "S").map(([k]) => k)
+    .sort((a, b) => E.rels[a].them.path.length - E.rels[b].them.path.length || (P(a).birth || "9").localeCompare(P(b).birth || "9"));
+  const keeper = id === S.lineage_heir || id === theHead();     // the heir and the Head see to the family's graves (duty: the heir's office)
+  const graves = !keeper ? [] : rels.filter(([k, x]) => dead(P(k)) && x.tags.includes("kin") && !x.tags.includes("paramour")).map(([k]) => k)
+    .sort((a, b) => (P(a).burial || "~").localeCompare(P(b).burial || "~") || a - b);
+  $("#sheet").innerHTML = `<h1>${t("The register of {name}", {name: esc(me.name) + (me.ko_name ? " " + esc(me.ko_name) : "")})}</h1>
+    <div class="small">${esc(life(me))} · ${t("kept to the fourth generation, as the house's remembrance reaches")} · ${new Date().toISOString().slice(0, 10)}</div>
+    ${up.map(([g, ks]) => `<h2>${t(gen[g])}</h2>${table(ks.sort((a, b) => (P(a).sex === "m" ? 0 : 1) - (P(b).sex === "m" ? 0 : 1)).map(k => row(k, E.rels[k].them.en.split(" (")[0])))}`).join("")}
+    ${down.length ? `<h2>${t("The house: wife, children and grandchildren")}</h2>${table(down.map(k => row(k, E.rels[k].them.en.split(" (")[0])))}` : ""}
+    ${graves.length ? `<h2>${t("Graves of the family ({n}), in your keeping as {office}", {n: graves.length, office: id === S.lineage_heir ? t("heir of the main line") : t("Head of the family")})}</h2>${table(graves.map(k => row(k, E.rels[k].them.en.split(" (")[0])))}` : ""}
+    <h2>${t("Notes")}</h2><div class="notebox"></div>`;
+  window.print();
+}
+
+/* ---------- start ---------- */
+async function fromHash() {         // deep links: #ego=12&sel=30&view=fan · #tab=atlas&av=authority · #tab=way&q=filial
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const saved = +(hash.get("ego") || localStorage.getItem("way-ego"));
+  const ego = P(saved) ? saved : (S.me && P(S.me) ? S.me : null);
+  if (ego !== egoId || !E) { egoId = ego; await loadEgo(); recenter = true; }
+  const tab = ["map", "atlas", "between", "way", "rulings", "clan", "about"].includes(hash.get("tab")) ? hash.get("tab") : "stand";
+  sel = tab === "stand" && E && E.rels[+hash.get("sel")] ? +hash.get("sel") : null;
+  if (VIEWS.includes(hash.get("view"))) view = hash.get("view");
+  reach = hash.get("reach") === "wide" ? "wide" : "close"; $("#reachBtn").textContent = reach === "close" ? t("Wider") : t("Closer");
+  if (["network", "houses", "lines", "authority", "lifelines"].includes(hash.get("av"))) atlasView = hash.get("av");
+  atlasSel = tab === "atlas" && P(+hash.get("sel")) ? +hash.get("sel") : null;
+  if (hash.get("q")) { libQ = hash.get("q"); libHits = (await api("GET", "/api/library?q=" + encodeURIComponent(libQ))).results; }
+  showTab(tab); render();
+}
+window.addEventListener("hashchange", fromHash);
+window.addEventListener("resize", () => { clearTimeout(window._rs); window._rs = setTimeout(() => { const tab = document.querySelector("nav button.on").dataset.tab; if (tab === "stand" || tab === "atlas") render(); }, 200); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !dlg.open && document.activeElement.tagName !== "INPUT") { if (sel != null) { sel = null; draw(); panel(); syncHash(); } if (atlasSel != null) { atlasSel = null; drawAtlas(); } } });
+function onLangChange() { if (!S) return; ["ex-banner", "ro-banner"].forEach(b => { const x = document.getElementById(b); if (x) x.remove(); }); chrome(); render(); }     // i18n.js calls this after a new language is loaded
+(async () => { await loadLang(); await loadState(); await fromHash(); maybeWelcome(); })();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "_about": "Folders of books to index for the Library search. Run ./run.sh index after changing this or adding books. 'match' and 'exclude' are case-insensitive regular expressions tested against each file's path; without 'match' every file in the folder is taken. Formats: epub, pdf, mobi, azw3, txt, md. A folder may be absolute or relative to this project; if one is missing its books stay in the index as they were. The same title in several formats is indexed once.",
+  "sources": [
+    {
+      "path": "sources",
+      "glob": "**/*.md",
+      "exclude": "^/private/"
+    }
+  ]
+}

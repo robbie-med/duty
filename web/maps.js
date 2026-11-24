@@ -85,6 +85,17 @@ function gapOf(id) {
   if (!(IX().parents[id] || []).length) return "parents";
   return "complete";
 }
+/* who keeps a living soul of the family: himself, the head of their house, another acting for one who stepped down,
+   a kinsman bound to act, or no one */
+function keeperOf(id) {
+  if (dead(P(id))) return "dead";
+  if (!ofFamily(id)) return "outside";
+  const h = S.heads[id];
+  if (h == null) return "headless";
+  if (S.bound[id]) return "bound";
+  if (h === id) return "head";
+  return id in S.heads_right && S.heads_right[id] !== h ? "right" : "kept";
+}
 const bondWord = s => ({kept: t("kept"), strained: t("strained"), broken: t("broken"), severed: t("severed"), unset: t("unset")})[s] || s;
 const LENSES = {
   bond: {label: () => t("Bond with me"), ego: true, of: id => egoBond(id),
@@ -97,6 +108,9 @@ const LENSES = {
     cats: () => [["member", t("member"), "#8d8473"], ["entering", t("being received"), "#2f6f9f"], ["estranged", t("estranged"), "#c98a1b"], ["cut_off", t("cut off"), "#1d1b19"], ["outside", t("not of the family"), "#c4bdb0"], ["dead", t("dead"), "#e2dacb"]]},
   line: {label: () => t("Father’s line"), of: id => { const l = IX().lineOf(id); return IX().lines.includes(l) ? l : "other"; },
     cats: () => [...IX().lines.map((l, i) => [l, l, CAT[i]]), ["other", t("other lines"), NONE]]},
+  keep: {label: () => t("Who keeps them"), of: keeperOf,
+    cats: () => [["head", t("heads his own house"), "var(--ink)"], ["kept", t("kept by the head of their house"), "var(--kept)"], ["right", t("kept for a head who stepped down or left"), "var(--strained)"],
+      ["bound", t("kept by a kinsman bound to act"), "#2f6f9f"], ["headless", t("no one keeps them"), "var(--broken)"], ["outside", t("not of the family"), "#c4bdb0"], ["dead", t("dead"), "#e2dacb"]]},
   gaps: {label: () => t("Missing facts"), of: gapOf,
     cats: () => [["sex", t("sex unknown"), "var(--broken)"], ["dates", t("no birth date"), "var(--strained)"], ["parents", t("no parents on record"), "#2f6f9f"], ["complete", t("complete"), "var(--kept)"]]},
 };
@@ -282,8 +296,8 @@ function openDuties(id, sphere) {
 }
 
 /* ---------- Atlas: the whole family ---------- */
-let atlasView = localStorage.getItem("way-atlas") || "network", atlasSel = null, atlasWho = "all", atlasByYear = true, lifeBand = null, NETPOS = null;
-function setAtlas(v) { atlasView = v; atlasSel = null; localStorage.setItem("way-atlas", v); recenterAtlas = true; drawAtlas(); syncHash(); }
+let atlasView = localStorage.getItem("way-atlas") || "network", atlasSel = null, atlasWho = "near", atlasByYear = true, atlasIslands = false, lifeBand = null, NETPOS = null;
+function setAtlas(v) { if (v === "houses" && atlasView !== "houses") { lens = "keep"; lensPick = null; } atlasView = v; atlasSel = null; localStorage.setItem("way-atlas", v); recenterAtlas = true; drawAtlas(); syncHash(); }
 let recenterAtlas = true;
 function atlasPeople() {
   const all = Object.values(S.people).map(p => p.id), x = IX();
@@ -294,16 +308,20 @@ function atlasPeople() {
   return all;
 }
 function drawAtlas() {
-  const host = $("#atlas"), seg = [["network", t("Network")], ["authority", t("Authority")], ["lifelines", t("Lifelines")]];
-  host.classList.toggle("scroll", atlasView !== "network");
+  const host = $("#atlas"), seg = [["network", t("Network")], ["houses", t("Houses")], ["lines", t("Lines")], ["authority", t("Authority")], ["lifelines", t("Lifelines")]];
+  if (!seg.some(v => v[0] === atlasView)) atlasView = "network";
+  host.classList.toggle("scroll", atlasView === "authority" || atlasView === "lifelines");
   let ids = atlasPeople();
   const who = `<select onchange="atlasWho=this.value;NETPOS=null;recenterAtlas=true;drawAtlas()">${[["all", t("everyone")], ["near", t("the living and their nearest")], ["living", t("only the living")]].map(([k, v]) => `<option value="${k}"${atlasWho === k ? " selected" : ""}>${v}</option>`).join("")}</select>`;
   const find = `<div class="find"><input type="search" id="aq" placeholder="${t("find on the map…")}" autocomplete="off" style="width:170px"><div class="drop" id="adrop" hidden></div></div>`;
   if (atlasView === "network") ids = drawNetwork(ids);
+  else if (atlasView === "houses") ids = drawHouses();
+  else if (atlasView === "lines") ids = drawLines();
   else if (atlasView === "authority") ids = drawAuthority();
   else ids = drawLifelines(ids);
   $("#atools").innerHTML = `<span class="seg">${seg.map(([k, v]) => `<button class="${atlasView === k ? "on" : ""}" onclick="setAtlas('${k}')">${v}</button>`).join("")}</span>
-    ${atlasView !== "authority" ? who : ""}${atlasView === "network" ? `<label class="mute" style="font-size:13px"><input type="checkbox" ${atlasByYear ? "checked" : ""} onchange="atlasByYear=this.checked;NETPOS=null;recenterAtlas=true;drawAtlas()"> ${t("top to bottom by birth year")}</label>` : ""}
+    ${atlasView === "network" || atlasView === "lifelines" ? who : ""}${atlasView === "network" ? `<label class="mute" style="font-size:13px"><input type="checkbox" ${atlasByYear ? "checked" : ""} onchange="atlasByYear=this.checked;NETPOS=null;recenterAtlas=true;drawAtlas()"> ${t("top to bottom by birth year")}</label>
+      <label class="mute" style="font-size:13px"><input type="checkbox" ${atlasIslands ? "checked" : ""} onchange="atlasIslands=this.checked;NETPOS=null;recenterAtlas=true;drawAtlas()"> ${t("groups not joined to the tree")}</label>` : ""}
     ${find}${atlasView !== "authority" ? lensControls(ids, "atlas") : ""}`;
   attachFinder($("#aq"), $("#adrop"), id => { atlasSel = id; drawAtlas(); const h = $("#atlas"); if (h.zoomTo && NETPOS && NETPOS.pos[id]) h.zoomTo(NETPOS.pos[id].x, NETPOS.pos[id].y, 700);
     else { const el = h.querySelector(`[data-id="${id}"]`); if (el) el.scrollIntoView({block: "center"}); } });
@@ -344,6 +362,17 @@ const ATLAS_HELP = {
         others.slice(0, 25).map(([c, n]) => { const ids = Object.keys(x.comp).filter(i => x.comp[i] === +c).map(Number);
           return `<div class="duty" style="cursor:pointer" onclick="atlasSel=${ids[0]};drawAtlas()"><div class="t"><span>${ids.slice(0, 3).map(i => esc(nm(i))).join(", ")}${n > 3 ? ` +${n - 3}` : ""}</span></div><span class="mute">${n}</span></div>`; }).join("")
         : `<p class="mute">${t("Everyone is joined to the main tree.")}</p>`}</div>`; },
+  houses: () => { const c = {}; for (const p of Object.values(S.people)) if (!dead(p) && ofFamily(p.id)) { const k = keeperOf(p.id); c[k] = (c[k] || 0) + 1; }
+    const heads = new Set(Object.values(S.people).filter(p => !dead(p) && ofFamily(p.id)).map(p => S.heads[p.id]).filter(h => h != null)).size;
+    return `<h2>${t("Houses")}</h2><p class="mute" style="font-size:13px">${t("Every living soul of the family, inside the house of the man who keeps them. The houses of one father's line sit together in a dashed outline; the great circle is the whole family under its Head.")}
+      ${t("Each house's head sits at its center. Zoom in to read every name; click a dot for their card, double-click to stand there.")}</p>
+      <div class="astats" style="margin-top:10px">
+        <div class="tile"><b>${heads}</b><span>${t("houses")}</span></div>
+        <div class="tile${c.bound ? " warn" : ""}"><b>${c.bound || 0}</b><span>${t("kept by a kinsman bound to act")}</span></div>
+        <div class="tile${c.right ? " warn" : ""}"><b>${c.right || 0}</b><span>${t("kept for a head who stepped down or left")}</span></div>
+        <div class="tile${c.headless ? " bad" : ""}"><b>${c.headless || 0}</b><span>${t("no one keeps them")}</span></div></div>`; },
+  lines: () => `<h2>${t("Lines of houses")}</h2><p class="mute" style="font-size:13px">${t("Each father's line, through men only, from its first known man to the men living now. The heavy line is the main line: eldest son after eldest son, passing to the next brother where a line has no living man. Younger sons' lines branch below it.")}
+      ${t("Only branches that reach a living man of the family are drawn. Bold: the head of a house.")}</p>`,
   authority: () => `<h2>${t("Who answers to whom")}</h2><p class="mute" style="font-size:13px">${t("The Head of the family stands over every house. Each card is a house and the man who acts at its head; inside are those in his keeping.")}
       ${t("{bound} marks a house kept by a kinsman bound to act for it.", {bound: BOUND_BADGE()})} ${t("Amber chips are under someone {i}by right{_i} who has stepped down or abandoned them.", {i: "<i>", _i: "</i>"})} ${t("A red card is a headless house no kinsman is bound to.")}</p>
       <p class="mute" style="font-size:13px">${t("Click a person for their card; click a head's name to stand in his place.")}</p>`,
@@ -356,7 +385,8 @@ const ATLAS_HELP = {
 
 /* Network: the whole family, positioned by a small force layout (cached until the state changes) */
 function drawNetwork(ids) {
-  const host = $("#atlas"), x = IX(), set = new Set(ids);
+  const host = $("#atlas"), x = IX();
+  if (!atlasIslands) ids = ids.filter(i => x.comp[i] === x.main);
   const key = ids.join(",") + "|" + atlasByYear;
   if (!NETPOS || NETPOS.key !== key || NETPOS.S !== S) NETPOS = {key, S, pos: netLayout(ids, x)};
   const pos = NETPOS.pos, YS = 7;
@@ -370,8 +400,14 @@ function drawNetwork(ids) {
     const now = (THIS_YEAR - 1900) * YS;
     s += `<line class="nowline" x1="${bx.x - 2000}" x2="${bx.x + bx.w + 2000}" y1="${now}" y2="${now}"/><text class="axislab" x="${bx.x + 40}" y="${now - 4}">${t("today")}</text>`;
   }
-  for (const l of S.links) { const a = pos[l.parent_id], b = pos[l.child_id]; if (!a || !b) continue;
-    s += `<path class="nl" data-a="${l.parent_id}" data-b="${l.child_id}" d="M${a.x.toFixed(1)} ${a.y.toFixed(1)}C${a.x.toFixed(1)} ${((a.y + b.y) / 2).toFixed(1)} ${b.x.toFixed(1)} ${((a.y + b.y) / 2).toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}"/>`; }
+  const curve = (a, b) => `M${a.x.toFixed(1)} ${a.y.toFixed(1)}C${a.x.toFixed(1)} ${((a.y + b.y) / 2).toFixed(1)} ${b.x.toFixed(1)} ${((a.y + b.y) / 2).toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+  for (const c of ids) {              // one line from between the parents when they stand together, else one from each
+    const ps = (x.parents[c] || []).filter(p => pos[p]), b = pos[c];
+    const wed = ps.length === 2 && (x.spouses[ps[0]] || []).includes(ps[1]) && Math.abs(pos[ps[0]].x - pos[ps[1]].x) < 260 && Math.abs(pos[ps[0]].y - pos[ps[1]].y) < 200;
+    if (wed) { const m = {x: (pos[ps[0]].x + pos[ps[1]].x) / 2, y: Math.max(pos[ps[0]].y, pos[ps[1]].y)};
+      s += `<path class="nl" data-a="${ps[0]}" data-c="${ps[1]}" data-b="${c}" d="${curve(m, b)}"/>`; }
+    else for (const p of ps) s += `<path class="nl" data-a="${p}" data-b="${c}" d="${curve(pos[p], b)}"/>`;
+  }
   for (const u of S.unions) { const a = pos[u.a_id], b = pos[u.b_id]; if (!a || !b) continue;
     s += `<line class="nu ${u.status}" data-a="${u.a_id}" data-b="${u.b_id}" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}"/>`; }
   const top = theHead();
@@ -383,7 +419,8 @@ function drawNetwork(ids) {
       <text x="${r + 3}" y="3.5">${esc(clip(p.name, 22))}</text></g>`; }
   host.innerHTML = s + `</svg>`;
   const svg = host.querySelector("svg"), by = {};
-  svg.querySelectorAll(".nl,.nu").forEach(e => { (by[e.dataset.a] ||= []).push([e, e.dataset.b]); (by[e.dataset.b] ||= []).push([e, e.dataset.a]); });
+  svg.querySelectorAll(".nl,.nu").forEach(e => { (by[e.dataset.a] ||= []).push([e, e.dataset.b]); (by[e.dataset.b] ||= []).push([e, e.dataset.a]);
+    if (e.dataset.c) { (by[e.dataset.c] ||= []).push([e, e.dataset.b]); by[e.dataset.b].push([e, e.dataset.c]); } });
   host.querySelectorAll(".nn").forEach(n => {
     const id = n.dataset.id;
     n.onmouseenter = () => { svg.classList.add("focus"); n.classList.add("hi");
@@ -397,54 +434,198 @@ function drawNetwork(ids) {
   recenterAtlas = false;
   return ids;
 }
+/* The network layout: generations in layers (parents one above, husband and wife side by side), each layer ordered so
+   children sit under their parents (barycenter sweeps), then nudged toward their kin without overlapping. Groups not
+   joined to the main tree are laid out on their own and set to the right of it. */
 function netLayout(ids, x) {
-  const n = ids.length, idx = {}, YS = 7;
-  ids.forEach((id, i) => idx[id] = i);
-  const X = new Float64Array(n), Y = new Float64Array(n), TY = new Float64Array(n), VX = new Float64Array(n), VY = new Float64Array(n);
-  const lines = {}; let li = 0;
-  ids.forEach((id, i) => { const l = x.lineOf(id); if (!(l in lines)) lines[l] = li++;
-    const seed = (id * 9301 + 49297) % 233280 / 233280;
-    X[i] = (lines[l] % 12) * 90 + seed * 80; TY[i] = ((x.est[id] ?? 1950) - 1900) * YS; Y[i] = atlasByYear ? TY[i] : seed * 600; });
-  const LAB = ids.map(id => !dead(P(id)));
-  const springs = [];
-  for (const l of S.links) if (l.parent_id in idx && l.child_id in idx) springs.push([idx[l.parent_id], idx[l.child_id], 70, 0.04]);
-  for (const u of S.unions) if (u.a_id in idx && u.b_id in idx) springs.push([idx[u.a_id], idx[u.b_id], 26, 0.2]);
-  const iters = n > 300 ? 260 : 340;
-  for (let t = 0; t < iters; t++) {
-    const alpha = 1 - t / iters;
-    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
-      let dx = X[i] - X[j], dy = Y[i] - Y[j]; const d2 = dx * dx + dy * dy;
-      if (d2 > 90000) continue;
-      if (d2 < 0.01) { dx = 0.1 * (i - j); dy = 0; }
-      const f = 700 / Math.max(d2, 60);
-      VX[i] += dx * f * 0.05; VX[j] -= dx * f * 0.05;
-      if (!atlasByYear) { VY[i] += dy * f * 0.05; VY[j] -= dy * f * 0.05; }
-    }
-    if (atlasByYear && t > iters * 0.3) for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
-      const dy = Y[i] - Y[j]; if (dy > 13 || dy < -13) continue;
-      const gap = LAB[i] || LAB[j] ? 96 : 16, dx = X[i] - X[j];
-      if (dx < gap && dx > -gap) { const push = (gap - Math.abs(dx)) * 0.25 * (dx >= 0 ? 1 : -1) || 1; X[i] += push; X[j] -= push; }
-    }
-    for (const [a, b, L, k] of springs) { const dx = X[b] - X[a], dy = Y[b] - Y[a], d = Math.sqrt(dx * dx + dy * dy) || 1, f = (d - L) * k / d;
-      VX[a] += dx * f; VX[b] -= dx * f; if (!atlasByYear) { VY[a] += dy * f; VY[b] -= dy * f; } }
-    for (let i = 0; i < n; i++) {
-      VX[i] -= X[i] * 0.0008;                                   // a gentle pull to the middle
-      if (atlasByYear) { Y[i] = TY[i]; VY[i] = 0; } else VY[i] -= (Y[i] - TY[i]) * 0.002;
-      X[i] += Math.max(-30, Math.min(30, VX[i] * alpha)); Y[i] += Math.max(-30, Math.min(30, VY[i] * alpha));
-      VX[i] *= 0.55; VY[i] *= 0.55;
-    }
+  const YS = 7, comps = {}, pos = {};
+  for (const id of ids) (comps[x.comp[id]] ||= []).push(id);
+  const order = Object.values(comps).sort((a, b) => (a.includes(egoId) ? -1 : 0) - (b.includes(egoId) ? -1 : 0) || b.length - a.length);
+  let cursor = null;
+  for (const c of order) {
+    const p = layerLayout(c, x);
+    const xs = c.map(id => p[id].x), lo = Math.min(...xs), hi = Math.max(...xs) + 110;
+    const dx = cursor == null ? 0 : cursor - lo;
+    for (const id of c) pos[id] = {x: p[id].x + dx, y: atlasByYear ? ((x.est[id] ?? 1950) - 1900) * YS : p[id].g * 90};
+    cursor = hi + dx + 120;
   }
-  if (atlasByYear) for (let t = 0; t < 80; t++) {          // last, part any names still sitting on one another
-    let moved = 0;
-    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
-      if (Math.abs(Y[i] - Y[j]) > 13) continue;
-      const gap = LAB[i] || LAB[j] ? 100 : 14, dx = X[i] - X[j];
-      if (Math.abs(dx) < gap) { const push = (gap - Math.abs(dx)) / 2 * (dx > 0 || (dx === 0 && i < j) ? 1 : -1); X[i] += push; X[j] -= push; moved++; }
+  if (atlasByYear) {                                       // part any names still sitting on one another
+    const n = ids.length, X = ids.map(id => pos[id].x), Y = ids.map(id => pos[id].y), LAB = ids.map(id => !dead(P(id)));
+    for (let t = 0; t < 200; t++) {
+      let moved = 0;
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+        if (Math.abs(Y[i] - Y[j]) > 12) continue;
+        const gap = LAB[i] || LAB[j] ? 100 : 14, dx = X[i] - X[j];
+        if (Math.abs(dx) < gap) { const push = (gap - Math.abs(dx)) / 2 * (dx > 0 || (dx === 0 && i < j) ? 1 : -1); X[i] += push; X[j] -= push; moved++; }
+      }
+      if (!moved) break;
     }
-    if (!moved) break;
+    ids.forEach((id, i) => pos[id].x = X[i]);
   }
-  const pos = {}; ids.forEach((id, i) => pos[id] = {x: X[i], y: Y[i]});
   return pos;
+}
+function layerLayout(ids, x) {
+  const set = new Set(ids), gen = {};
+  const seeds = [...(set.has(egoId) ? [egoId] : []), ...ids.slice().sort((a, b) => (x.est[a] ?? 9999) - (x.est[b] ?? 9999))];
+  for (const s of seeds) { if (gen[s] != null) continue; gen[s] = 0; const q = [s];
+    while (q.length) { const v = q.shift();
+      for (const [list, dg] of [[x.parents[v], -1], [x.kids[v], 1], [x.spouses[v], 0]])
+        for (const w of list || []) if (set.has(w) && gen[w] == null) { gen[w] = gen[v] + dg; q.push(w); } } }
+  // a unit: a man or woman with the spouses of the same generation beside them
+  const unitOf = {}, units = [];
+  for (const id of ids) { if (unitOf[id] != null) continue; const u = [id]; unitOf[id] = units.length;
+    for (let i = 0; i < u.length && u.length < 4; i++) for (const s of x.spouses[u[i]] || [])
+      if (set.has(s) && unitOf[s] == null && gen[s] === gen[id] && u.length < 4) { unitOf[s] = units.length; u.push(s); }
+    if (u.length > 2) { const hub = u.slice().sort((a, b) => (x.spouses[b] || []).length - (x.spouses[a] || []).length)[0], rest = u.filter(i => i !== hub); u.splice(0, u.length, rest[0], hub, ...rest.slice(1)); }
+    units.push(u); }
+  const W = id => dead(P(id)) ? 22 : atlasByYear ? 58 : 106, UW = units.map(u => u.reduce((n, id) => n + W(id), 0)), GAP = 16;
+  const UX = new Float64Array(units.length), L = {};
+  units.forEach((u, i) => (L[gen[u[0]]] ||= []).push(i));
+  const gs = Object.keys(L).map(Number).sort((a, b) => a - b);
+  const px = id => { const u = unitOf[id]; let o = UX[u]; for (const m of units[u]) { if (m === id) return o; o += W(m); } return o; };
+  const bary = (u, rel) => { let s = 0, n = 0; for (const id of units[u]) for (const w of rel[id] || []) if (set.has(w)) { s += px(w); n++; } return n ? s / n : null; };
+  const pack = g => { let c = 0; for (const u of L[g]) { UX[u] = c; c += UW[u] + GAP; } for (const u of L[g]) UX[u] -= c / 2; };
+  for (const g of gs) L[g].sort((a, b) => (x.est[units[a][0]] ?? 9999) - (x.est[units[b][0]] ?? 9999)), pack(g);
+  const sweep = (g, rel) => { const k = {}; for (const u of L[g]) { const b = bary(u, rel); k[u] = b == null ? UX[u] + UW[u] / 2 : b; } L[g].sort((a, b) => k[a] - k[b]); pack(g); };
+  for (let it = 0; it < 12; it++) { for (const g of gs) sweep(g, x.parents); for (const g of [...gs].reverse()) sweep(g, x.kids); }
+  for (const u of units.keys()) if (units[u].length === 2) {          // the spouse from elsewhere on the side away from the other's parents
+    const [a, b] = units[u], pa = bary(unitOf[a], {[a]: x.parents[a]}), pb = bary(unitOf[b], {[b]: x.parents[b]});
+    if (pa != null && pb != null ? pa > pb : pa != null ? pa > UX[u] + UW[u] / 2 : pb != null && pb < UX[u] + UW[u] / 2) units[u].reverse();
+  }
+  const settle = g => { const us = L[g], want = us.map(u => { const b = [bary(u, x.parents), bary(u, x.kids)].filter(v => v != null);
+      return (b.length ? b.reduce((p, q) => p + q) / b.length : UX[u] + UW[u] / 2) - UW[u] / 2; }), f = [], k = [];
+    for (let i = 0; i < us.length; i++) f[i] = i ? Math.max(want[i], f[i - 1] + UW[us[i - 1]] + GAP) : want[i];
+    for (let i = us.length - 1; i >= 0; i--) k[i] = i < us.length - 1 ? Math.min(want[i], k[i + 1] - UW[us[i]] - GAP) : want[i];
+    us.forEach((u, i) => UX[u] = (f[i] + k[i]) / 2); };
+  for (let it = 0; it < 24; it++) for (const g of it % 2 ? [...gs].reverse() : gs) settle(g);
+  const out = {}; for (const id of ids) out[id] = {x: px(id), g: gen[id]};
+  return out;
+}
+
+/* circles packed close around the first, largest first: sets c.x, c.y (centered) and returns the enclosing radius */
+function packCircles(cs, gap) {
+  const placed = [];
+  for (const c of cs) {
+    if (!placed.length) { c.x = 0; c.y = 0; placed.push(c); continue; }
+    let best = null;
+    for (const a of placed) for (let k = 0; k < 36; k++) {
+      const ang = k * Math.PI / 18, d = a.r + c.r + gap, cx = a.x + d * Math.cos(ang), cy = a.y + d * Math.sin(ang);
+      if (placed.some(o => Math.hypot(o.x - cx, o.y - cy) < o.r + c.r + gap - 0.5)) continue;
+      const score = Math.hypot(cx, cy * 1.25);              // a little wider than tall, for a wide screen
+      if (!best || score < best[0]) best = [score, cx, cy];
+    }
+    c.x = best[1]; c.y = best[2]; placed.push(c);
+  }
+  const x0 = Math.min(...placed.map(c => c.x - c.r)), x1 = Math.max(...placed.map(c => c.x + c.r));
+  const y0 = Math.min(...placed.map(c => c.y - c.r)), y1 = Math.max(...placed.map(c => c.y + c.r));
+  for (const c of placed) { c.x -= (x0 + x1) / 2; c.y -= (y0 + y1) / 2; }
+  return Math.max(...placed.map(c => Math.hypot(c.x, c.y) + c.r));
+}
+
+/* Houses: every living soul of the family inside the house of the man who keeps them; the houses of one father's line
+   together; the whole family inside one circle under its Head */
+function drawHouses() {
+  const host = $("#atlas"), x = IX(), top = theHead();
+  const living = Object.values(S.people).filter(p => !dead(p) && ofFamily(p.id)).map(p => p.id);
+  const keep = {}, headless = [];
+  for (const id of living) { const h = S.heads[id]; if (h == null) headless.push(id); else (keep[h] ||= []).push(id); }
+  // each house packs with room for its name above it (r), though its blob (br) is drawn to fit its people
+  const DOT = 15, house = (h, ms, line, k) => { const br = DOT * Math.sqrt(ms.length + k) + 12,
+      lab = (h == null ? t("no one keeps them") : t("house of {name}", {name: clip(nm(h), 24)})) + " · " + ms.length;
+    return {h, ms, line, br, lab, r: Math.max(br + 16, lab.length * 3.2)}; };
+  const houses = Object.entries(keep).map(([h, ms]) => { h = +h;
+    ms.sort((a, b) => (b === h) - (a === h) || (x.est[a] ?? 9999) - (x.est[b] ?? 9999));
+    return house(h, ms, x.lineOf(h), 0); });
+  if (headless.length) houses.push(house(null, headless, "", 0.5));
+  const byLine = {};
+  for (const H of houses) (byLine[H.line] ||= []).push(H);
+  const groups = Object.entries(byLine).map(([l, list]) => {
+    list.sort((a, b) => (b.h === top) - (a.h === top) || b.ms.length - a.ms.length);
+    return {l, list, r: (list.length > 1 ? packCircles(list, 4) + 14 : (list[0].x = list[0].y = 0, list[0].r))}; });
+  groups.sort((a, b) => b.list.some(H => H.h === top) - a.list.some(H => H.h === top) || (a.l === "") - (b.l === "") || b.r - a.r);
+  packCircles(groups, 14);
+  const P0 = 30, bx = {x: Math.min(...groups.map(G => G.x - G.r)) - P0, y: Math.min(...groups.map(G => G.y - G.r)) - P0};
+  bx.w = Math.max(...groups.map(G => G.x + G.r)) + P0 - bx.x; bx.h = Math.max(...groups.map(G => G.y + G.r)) + P0 - bx.y;
+  let s = `<svg><rect class="clan" x="${bx.x.toFixed(1)}" y="${bx.y.toFixed(1)}" width="${bx.w.toFixed(1)}" height="${bx.h.toFixed(1)}" rx="${(Math.min(bx.w, bx.h) * 0.3).toFixed(1)}"/><text class="clanlab" x="${(bx.x + bx.w / 2).toFixed(1)}" y="${(bx.y - 12).toFixed(1)}" text-anchor="middle">${top != null ? esc(t("The family under {name}", {name: nm(top)})) : esc(t("The family"))} · ${esc(t("{n} living", {n: living.length}))}</text>`;
+  for (const G of groups) {
+    if (G.list.length > 1) s += `<circle class="lineblob" cx="${G.x.toFixed(1)}" cy="${G.y.toFixed(1)}" r="${G.r.toFixed(1)}"/>
+      <text class="linelab" x="${G.x.toFixed(1)}" y="${(G.y - G.r - 6).toFixed(1)}" text-anchor="middle">${esc(lineName(G.l))} · ${esc(t("{n} houses", {n: G.list.length}))}</text>`;
+    for (const H of G.list) {
+      const hx = G.x + H.x, hy = G.y + H.y, own = H.ms[0] === H.h;
+      s += `<g class="hb${H.h == null ? " headless" : ""}${H.h === top ? " top" : ""}" transform="translate(${hx.toFixed(1)},${hy.toFixed(1)})"><circle class="blob" r="${H.br.toFixed(1)}"/>
+        <text class="hlab" y="${(-H.br - 4).toFixed(1)}" text-anchor="middle"${H.h != null ? ` data-id="${H.h}"` : ""}>${esc(H.lab)}</text>`;
+      H.ms.forEach((id, k) => { const kk = own ? k : k + 0.5, rr = DOT * 0.92 * Math.sqrt(kk), a = kk * 2.39996, p = P(id);
+        const big = own && k === 0, r = big ? 7.5 : 5.5, px = (rr * Math.cos(a)).toFixed(1), py = (rr * Math.sin(a)).toFixed(1);
+        s += `<g class="hm${faded(id) ? " faded" : ""}${atlasSel === id ? " sel" : ""}${big ? " head" : ""}" data-id="${id}" transform="translate(${px},${py})">
+          <title>${esc(p.name)} ${esc(life(p))}${E && E.rels[id] ? " — " + esc(E.rels[id].them.en) : ""}${big ? " — " + esc(t("head of his house")) : ""}</title>
+          ${id === egoId ? `<circle r="${r + 4}" class="ring ego"/>` : ""}${id === top ? `<circle r="${r + 2.5}" class="ring head"/>` : ""}
+          <circle r="${r}" style="fill:${lensColor(id)}"/><text class="mn" y="${r + 8}" text-anchor="middle">${esc(clip(p.name.split(" ")[0], 12))}</text></g>`; });
+      s += `</g>`;
+    }
+  }
+  host.innerHTML = s + `</svg>`;
+  host.querySelectorAll(".hm,.hlab[data-id]").forEach(n => { n.onclick = () => { atlasSel = +n.dataset.id; drawAtlas(); }; n.ondblclick = () => standAs(+n.dataset.id); });
+  zoomable(host, "houses", {x: bx.x - 10, y: bx.y - 34, w: bx.w + 20, h: bx.h + 44}, recenterAtlas, null);
+  recenterAtlas = false;
+  return living;
+}
+
+/* Lines: each father's line through men only, from its first known man to the men living now. The main line (eldest
+   son after eldest son, passing to the next brother where a line has no living man) runs straight along the top;
+   younger sons' lines branch below it. Only branches that reach a living man of the family are drawn. */
+function drawLines() {
+  const host = $("#atlas"), x = IX(), top = theHead();
+  const adopted = new Set(S.links.filter(l => l.kind === "adopted").map(l => l.parent_id + ">" + l.child_id));
+  const fatherOf = id => { const men = (x.parents[id] || []).filter(p => P(p) && P(p).sex === "m"); return men.find(p => adopted.has(p + ">" + id)) ?? men[0]; };
+  const living = Object.values(S.people).filter(p => !dead(p) && p.sex === "m" && ofFamily(p.id)).map(p => p.id);
+  const keepSet = new Set(), founder = {};
+  for (const m of living) { let v = m; const seen = new Set([m]); keepSet.add(m);
+    for (;;) { const f = fatherOf(v); if (f == null || seen.has(f)) break; seen.add(f); keepSet.add(f); v = f; }
+    founder[m] = v; }
+  const sons = {};
+  for (const id of keepSet) { const f = fatherOf(id); if (f != null && keepSet.has(f)) (sons[f] ||= []).push(id); }
+  for (const f in sons) sons[f].sort((a, b) => (x.est[a] ?? 9999) - (x.est[b] ?? 9999) || (P(a).birth_order || 99) - (P(b).birth_order || 99) || a - b);
+  const lines = {};
+  for (const m of living) (lines[founder[m]] ||= []).push(m);
+  const kept = h => Object.values(S.heads).filter(v => v === h).length;
+  const roots = Object.keys(lines).map(Number).sort((a, b) => lines[b].includes(top) - lines[a].includes(top) || (sons[b] ? 1 : 0) - (sons[a] ? 1 : 0) || lines[b].length - lines[a].length || nm(a).localeCompare(nm(b)));
+  const COLW = 190, ROWH = 34;
+  let s = "", y = 0, maxX = 0;
+  const lone = roots.filter(r => !sons[r]);
+  const node = (id, nx, ny, main, heir) => { const p = P(id), alive = !dead(p), hh = alive && isHouseHead(id), n = hh ? kept(id) : 0;
+    return `<g class="ln${alive ? " alive" : ""}${main ? " main" : ""}${faded(id) ? " faded" : ""}${atlasSel === id ? " sel" : ""}" data-id="${id}" transform="translate(${nx},${ny})">
+      <title>${esc(p.name)} ${esc(life(p))}${E && E.rels[id] ? " — " + esc(E.rels[id].them.en) : ""}</title>
+      ${id === egoId ? `<circle r="10" class="ring ego"/>` : ""}${id === top ? `<circle r="8.5" class="ring head"/>` : ""}
+      <circle r="${alive ? 6 : 4}" style="fill:${alive ? lensColor(id) : "#d8cfbf"}"/>
+      <text x="9" y="-6">${hh ? "<tspan font-weight='600'>" : ""}${esc(clip(p.name, 24))}${hh ? "</tspan>" : ""}</text>
+      <text class="sub" x="9" y="13">${esc([alive ? (yr(p) ? String(ageOf(id) ?? "") : "") : life(p), id === top ? t("Head of the family") : hh ? (n > 1 ? t("heads a house of {n}", {n}) : t("heads his own house")) : "", heir ? t("heir of the line") : ""].filter(Boolean).join(" · "))}</text></g>`; };
+  for (const r of roots.filter(r => sons[r])) {
+    let heir = null; for (let v = r; v != null; v = (sons[v] || [])[0]) if (!dead(P(v)) && ofFamily(v)) { heir = v; break; }
+    const nLiving = lines[r].length;
+    s += `<text class="lhead" x="0" y="${y + 6}">${esc(lineName(x.lineOf(r)))}</text><text class="lsub" x="0" y="${y + 22}">${esc(t("from {name} · {n} living men", {name: nm(r), n: nLiving}))}</text>`;
+    y += 50;
+    let row = y;
+    const place = (id, depth, main) => {          // returns the row the man sits on: his first son's row, so trunks run straight
+      const kids = sons[id] || [], nx = depth * COLW; maxX = Math.max(maxX, nx);
+      let myY = null, edges = "";
+      kids.forEach((k, i) => { const ky = place(k, depth + 1, main && i === 0); if (myY == null) myY = ky;
+        edges += `<path class="lsp${main && i === 0 ? " trunk" : ""}" d="M${nx} ${myY}H${nx + COLW / 2}V${ky}H${(depth + 1) * COLW}"/>`; });
+      if (myY == null) { myY = row; row += ROWH; }
+      s += edges + node(id, nx, myY, main, id === heir);
+      return myY; };
+    place(r, 0, true);
+    y = row + 26;
+  }
+  if (lone.length) {
+    s += `<text class="lhead" x="0" y="${y + 6}">${esc(t("Men whose fathers are not recorded"))}</text>`; y += 30;
+    lone.forEach((id, i) => { s += node(id, (i % 5) * COLW * 1.2, y + Math.floor(i / 5) * ROWH, false, false); });
+    maxX = Math.max(maxX, 4 * COLW * 1.2); y += Math.ceil(lone.length / 5) * ROWH;
+  }
+  host.innerHTML = `<svg>${s}</svg>`;
+  host.querySelectorAll(".ln").forEach(n => { n.onclick = () => { atlasSel = +n.dataset.id; drawAtlas(); }; n.ondblclick = () => standAs(+n.dataset.id); });
+  zoomable(host, "lines", {x: -30, y: -20, w: maxX + 260, h: y + 40}, recenterAtlas, {x: host.clientWidth * 0.55 - 30, y: host.clientHeight * 0.55 - 20, cap: 1.1});
+  recenterAtlas = false;
+  return [...keepSet].filter(id => !dead(P(id)));
 }
 
 /* Authority: the Head of the family over every house, and who is in each man's keeping */

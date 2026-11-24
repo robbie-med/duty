@@ -88,6 +88,19 @@ i.failing{background:var(--broken)}i.poorly{background:var(--strained)}i.kept{ba
 .nn.hi text{font-size:12px;fill:var(--ink);font-weight:600}
 .nn .ring{fill:none!important;stroke-width:2.2}.nn .ring.ego{stroke:var(--ink)}.nn .ring.head{stroke:var(--seal)}
 .nn.sel circle:not(.ring){stroke:var(--seal);stroke-width:3}
+.clan{fill:#fffdf8;stroke:var(--seal);stroke-width:1.5;stroke-opacity:.5}.clanlab{font-size:15px;font-weight:600;fill:var(--seal)}
+.lineblob{fill:none;stroke:var(--mute);stroke-width:1.2;stroke-dasharray:5 4;stroke-opacity:.6}.linelab{font-size:11px;fill:var(--mute);letter-spacing:.04em}
+.hb .blob{fill:#efe7d6;stroke:#cfc4ae;stroke-width:1}.hb.top .blob{fill:#f3e3dc;stroke:var(--seal)}.hb.headless .blob{fill:#f7e1dc;stroke:var(--broken);stroke-dasharray:4 3}
+.hlab{font-size:10.5px;fill:var(--ink);font-weight:600;cursor:pointer;paint-order:stroke;stroke:var(--paper);stroke-width:3px}
+.hm{cursor:pointer}.hm>circle:not(.ring){stroke:#fffdf8;stroke-width:1.5}.hm .ring{fill:none;stroke-width:2}.hm .ring.ego{stroke:var(--ink)}.hm .ring.head{stroke:var(--seal)}
+.hm .mn{font-size:7px;fill:var(--ink);display:none;pointer-events:none}svg.near .hm .mn{display:block}.hm.sel>circle:not(.ring){stroke:var(--seal);stroke-width:3}
+.lsp{fill:none;stroke:#cbc2b0;stroke-width:1.3}.lsp.trunk{stroke:var(--seal);stroke-width:3.5;stroke-opacity:.75}
+.ln{cursor:pointer}.ln text{font-size:11px;fill:var(--mute)}.ln.alive text{fill:var(--ink)}.ln text.sub{font-size:9px;fill:var(--mute)}
+.ln>circle:not(.ring){stroke:#fffdf8;stroke-width:1.5}.ln .ring{fill:none;stroke-width:2}.ln .ring.ego{stroke:var(--ink)}.ln .ring.head{stroke:var(--seal)}.ln.sel>circle:not(.ring){stroke:var(--seal);stroke-width:3}
+.lhead{font-size:15px;font-weight:600;fill:var(--seal)}.lsub{font-size:11px;fill:var(--mute)}
+.dring{fill:none;stroke:var(--line);stroke-width:1}.dring.zero{stroke:var(--seal);stroke-opacity:.35}
+.dlab{font-size:11px;fill:var(--mute);paint-order:stroke;stroke:var(--paper);stroke-width:4px}
+.wnode.inlaw circle.dot{stroke-dasharray:3 2}
 .grid{stroke:#e5ddcd;stroke-width:1}.axislab{font-size:11px;fill:var(--mute)}.nowline{stroke:var(--seal);stroke-dasharray:4 4;stroke-width:1}
 .lifesvg{display:block;margin:6px 12px;cursor:default}
 .lifesvg .band{fill:#2f6f9f;fill-opacity:.06}
@@ -283,7 +296,7 @@ details.dx>.src,details.dx>.prov,details.dx>.whynot{margin-left:1em}details.dx>.
 <main id="tab-stand" class="on">
   <div class="stage">
     <div class="tools">
-      <span class="seg" title="how to draw the people around you" data-i18n-attr="title"><button id="v_web" onclick="setView('web')" title="a spoke to each relation" data-i18n data-i18n-attr="title">Web</button><button id="v_tree" onclick="setView('tree')" title="rows by generation" data-i18n data-i18n-attr="title">Tree</button><button id="v_fan" onclick="setView('fan')" title="ancestors above, descendants below" data-i18n data-i18n-attr="title">Fan</button><button id="v_duties" onclick="setView('duties')" title="what you owe each person, by sphere" data-i18n data-i18n-attr="title">Duties</button></span>
+      <span class="seg" title="how to draw the people around you" data-i18n-attr="title"><button id="v_web" onclick="setView('web')" title="a spoke to each relation" data-i18n data-i18n-attr="title">Web</button><button id="v_rings" onclick="setView('rings')" title="rings by degree of kinship" data-i18n data-i18n-attr="title">Degrees</button><button id="v_tree" onclick="setView('tree')" title="rows by generation" data-i18n data-i18n-attr="title">Tree</button><button id="v_fan" onclick="setView('fan')" title="ancestors above, descendants below" data-i18n data-i18n-attr="title">Fan</button><button id="v_duties" onclick="setView('duties')" title="what you owe each person, by sphere" data-i18n data-i18n-attr="title">Duties</button></span>
       <button class="btn sm" id="reachBtn" onclick="toggleReach()">Wider</button>
       <label class="mute" style="font-size:13px" id="deadBox"><input type="checkbox" id="showDead" checked onchange="draw()"> <span data-i18n>show the dead</span></label>
       <span id="lensbar" class="row" style="gap:6px 10px"></span>
@@ -321,7 +334,7 @@ details.dx>.src,details.dx>.prov,details.dx>.whynot{margin-left:1em}details.dx>.
 "use strict";
 let S = null, E = null, egoId = null, sel = null, reach = "close", examine = false;
 let recenter = true, view = localStorage.getItem("way-view") || "web", mapRoot = null, mapLiving = true;
-let betweenIds = [], betweenCell = null, wayFilter = {from: "", trad: "", status: "", text: ""}, libQ = "", libHits = [];
+let betweenIds = [], betweenCell = null, betweenAuto = null, betweenCleared = false, wayFilter = {from: "", trad: "", status: "", text: ""}, libQ = "", libHits = [];
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 const P = id => S.people[id];
@@ -521,17 +534,18 @@ function edges(pos, W, H) {
   return s;
 }
 const clip = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
+const VIEWS = ["web", "rings", "tree", "fan", "duties"];
 function setView(v) { view = v; localStorage.setItem("way-view", v); recenter = true; draw(); syncHash(); }
 function draw() {
-  if (!["web", "tree", "fan", "duties"].includes(view)) view = "web";
-  for (const v of ["web", "tree", "fan", "duties"]) $("#v_" + v).classList.toggle("on", view === v);
+  if (!VIEWS.includes(view)) view = "web";
+  for (const v of VIEWS) $("#v_" + v).classList.toggle("on", view === v);
   const box = $("#tree");
   box.classList.toggle("scroll", view === "duties");
   $("#reachBtn").hidden = $("#deadBox").hidden = view === "fan";
   $("#reachBtn").textContent = reach === "close" ? t("Wider") : t("Closer");
   if (!E) { box.innerHTML = welcome(); $("#lensbar").innerHTML = ""; return; }
-  const ids = view === "web" ? drawRadial() : view === "tree" ? drawTree() : view === "fan" ? drawFan() : drawDuties();
-  $("#lensbar").innerHTML = view === "duties" ? "" : lensControls(ids || [], "stand");
+  const ids = view === "web" ? drawRadial() : view === "rings" ? drawRadial(true) : view === "tree" ? drawTree() : view === "fan" ? drawFan() : drawDuties();
+  $("#lensbar").innerHTML = view === "duties" ? "" : lensControls(ids || [], "stand") + (view === "rings" ? `<div class="mute" style="font-size:12px;margin-top:4px">${t("Each ring is a degree of kinship: one for every step up to a common ancestor and down again. A husband or wife has no degree and sits beside you. In-laws (dashed) take the degree of the one through whom they come.")}</div>` : "");
 }
 const standing = p => (p.standing && p.standing !== "member") ? p.standing : "";
 const theHead = () => (E && E.head) || S.head;
@@ -582,10 +596,16 @@ function egoBond(id) { const r = E.rels[id]; if (!r) return "unset";
   return [a, b].filter(Boolean).sort((x, y) => SEV[y] - SEV[x])[0] || "unset"; }
 /* The web: the person in the center, one spoke out to each relationship. People reached through
    someone (a brother's wife, a son's child) sit further out on that person's spoke, so no lines cross. */
-function drawRadial() {
+/* degree of kinship (촌수): steps up to the common ancestor and down again; a spouse none; in-laws take the degree of the
+   one through whom they come. Former spouses, paramours and the other parent of a child have none (null). */
+const kinDegree = path => /^[XKQ]$/.test(path) ? null : (path.match(/[PC]/g) || []).length;
+const degreeName = n => [t("degree {n}", {n}), ...((S.native_langs) || ["ko"]).filter(l => l === "ko" ? LANG !== "ko" : !LANG.startsWith("zh")).map(l => l === "ko" ? n + "촌" : n + (zhScript() === "hant" ? "親等" : "亲等"))].join(" · ");
+function drawRadial(byDegree) {
   const box = $("#tree"), ids = shown(), inSet = new Set(ids), kids = {}, depth = {};
   const parentOf = id => { const p = E.rels[id].them.path;
     if (p === "PC" || p === "PSC" || p === "X" || p === "K") return egoId;
+    // a sibling hangs off the one whose sibling they are, as yours do off you: a wife's brother beside her parents, not beyond them
+    if (p.endsWith("PC") || p.endsWith("PSC")) { const sib = E.rels[E.rels[id].via] && E.rels[E.rels[id].via].via; if (inSet.has(sib)) return sib; }
     let v = E.rels[id].via;
     while (v !== egoId && !inSet.has(v)) v = E.rels[v] ? E.rels[v].via : egoId;
     return v; };
@@ -597,28 +617,40 @@ function drawRadial() {
   let maxD = 1; const setD = (id, d) => { depth[id] = d; maxD = Math.max(maxD, d); (kids[id] || []).forEach(k => setD(k, d + 1)); };
   setD(egoId, 0);
   const R1 = Math.max(185, leaves[egoId] * 30 / (2 * Math.PI)), STEP = 150, rad = d => d ? R1 + (d - 1) * STEP : 0;
+  const DSTEP = 120, degs = {}; let maxDeg = 0;
+  if (byDegree) for (const id of ids) { degs[id] = kinDegree(E.rels[id].them.path); if (degs[id] != null) maxDeg = Math.max(maxDeg, degs[id]); }
+  const ringR = d => d === 0 ? 100 : R1 + ((d ?? maxDeg + 1) - 1) * DSTEP;
+  const radius = id => id === egoId ? 0 : byDegree ? ringR(degs[id]) : rad(depth[id]);
   const pos = {}, parents = (kids[egoId] || []).filter(k => E.rels[k].them.path === "P").reduce((n, k) => n + leaves[k], 0);
   const unit = 2 * Math.PI / leaves[egoId];
   const place = (id, a0) => { const span = leaves[id] * unit, a = a0 + span / 2;
-    pos[id] = {a, x: rad(depth[id]) * Math.cos(a), y: rad(depth[id]) * Math.sin(a)};
+    pos[id] = {a, x: radius(id) * Math.cos(a), y: radius(id) * Math.sin(a)};
     let c = a0; for (const k of kids[id] || []) { place(k, c); c += leaves[k] * unit; } };
   let c = -Math.PI / 2 - parents * unit / 2;              // parents sit at the top
   for (const k of kids[egoId] || []) { place(k, c); c += leaves[k] * unit; }
   pos[egoId] = {x: 0, y: 0, a: 0};
-  const PAD = 190, half = rad(maxD) + PAD, size = 2 * half;
+  const outer = byDegree ? Math.max(...ids.map(radius), R1) : rad(maxD);
+  const PAD = 190, half = outer + PAD, size = 2 * half;
   let s = `<svg viewBox="${-half} ${-half} ${size} ${size}">`;
-  for (let d = 1; d <= maxD; d++) s += `<circle class="ring" r="${rad(d)}"/>`;
+  if (!byDegree) for (let d = 1; d <= maxD; d++) s += `<circle class="ring" r="${rad(d)}"/>`;
+  else { const present = [...new Set(Object.values(degs).map(d => d ?? -1))].sort((a, b) => a - b);
+    for (const d of present) { const r = ringR(d < 0 ? null : d), lab = d < 0 ? t("no degree") : d === 0 ? t("husband or wife: no degree") : degreeName(d);
+      // the label sits in the widest empty stretch of its ring
+      const as = ids.filter(i => radius(i) <= r + 1 && (degs[i] ?? -1) >= (d < 0 ? -1 : d) - 1).map(i => ((pos[i].a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)).sort((a, b) => a - b);
+      let la = -Math.PI / 2;
+      if (as.length) { let gap = -1; as.forEach((a, i) => { const nx = i + 1 < as.length ? as[i + 1] : as[0] + 2 * Math.PI; if (nx - a > gap) { gap = nx - a; la = (a + nx) / 2; } }); }
+      s += `<circle class="dring${d === 0 ? " zero" : ""}" r="${r}"/><text class="dlab" x="${(r * Math.cos(la)).toFixed(1)}" y="${(r * Math.sin(la) + 4).toFixed(1)}" text-anchor="middle">${esc(lab)}</text>`; } }
   const pt = (r, a) => `${(r * Math.cos(a)).toFixed(1)} ${(r * Math.sin(a)).toFixed(1)}`;
   const bondLens = lensKey() === "bond";
-  for (const id of ids) { const par = parentOf(id), p = pos[id], q = pos[par], rc = rad(depth[id]), rp = rad(depth[par]), rm = (rc + rp) / 2;
+  for (const id of ids) { const par = parentOf(id), p = pos[id], q = pos[par], rc = radius(id), rp = radius(par), rm = (rc + rp) / 2;
     // outer spokes bend within their own band between two rings, so they never cut across another branch
     const d = par === egoId ? `M0 0L${pt(rc, p.a)}` : `M${pt(rp, q.a)}C${pt(rm, q.a)} ${pt(rm, p.a)} ${pt(rc, p.a)}`;
     s += `<path class="spoke${bondLens ? " s-" + egoBond(id) : ""}${faded(id) ? " faded" : ""}" data-id="${id}" style="fill:none;stroke:${lensColor(id)}" d="${d}"/>`; }
   for (const id of ids) {
-    const p = P(id), q = pos[id], r = E.rels[id], inner = !!(kids[id] || []).length, right = Math.cos(q.a) >= 0;
+    const p = P(id), q = pos[id], r = E.rels[id], inner = !!(kids[id] || []).length && !(byDegree && degs[id] === 0), right = Math.cos(q.a) >= 0;
     const deg = q.a * 180 / Math.PI + (right ? 0 : 180), out = inner ? -1 : 1, dir = (right ? 1 : -1) * out;
     const anchor = dir > 0 ? "start" : "end", rel = [clip(r.them.en.split(" (")[0], 20), native(r.them).split(" (")[0]].filter(Boolean).join(" · ");
-    s += `<g class="wnode${dead(p) ? " dead" : ""}${standing(p) ? " st-" + standing(p) : ""}${sel === id ? " sel" : ""}${faded(id) ? " faded" : ""}" data-id="${id}" data-up="${parentOf(id)}" transform="translate(${q.x.toFixed(1)},${q.y.toFixed(1)})">
+    s += `<g class="wnode${dead(p) ? " dead" : ""}${byDegree && /[SXKQ]/.test(r.them.path) && r.them.path !== "S" ? " inlaw" : ""}${standing(p) ? " st-" + standing(p) : ""}${sel === id ? " sel" : ""}${faded(id) ? " faded" : ""}" data-id="${id}" data-up="${parentOf(id)}" transform="translate(${q.x.toFixed(1)},${q.y.toFixed(1)})">
       <title>${esc(p.name)} ${esc(life(p))} — ${esc(r.them.en)}${id === theHead() ? " — " + t("Head of the family") : isHouseHead(id) ? " — " + t("head of his house") : ""}${standing(p) ? " — " + esc(t(S.meta.standings[standing(p)])) : ""}${p.headship ? " — " + esc(t(S.meta.headship[p.headship])) : ""}</title>
       <circle r="17" fill="transparent"/>${id === theHead() ? `<circle r="14" fill="none" stroke="var(--seal)" stroke-width="2"/>` : ""}<circle class="dot" r="${p.sex === "f" ? 9 : 8}"${standing(p) ? "" : ` style="stroke:${lensColor(id)};stroke-width:2.2"`}/>
       ${standing(p) === "cut_off" ? `<path d="M-4 -4L4 4M4 -4L-4 4" stroke="#fff" stroke-width="1.6"/>` : ""}
@@ -631,7 +663,7 @@ function drawRadial() {
     ${l2 ? `<text x="0" y="6" text-anchor="middle" fill="#fff" style="font-size:12.5px;font-weight:600">${esc(clip(l2, 12))}</text>` : ""}
     <text x="0" y="${l2 ? 22 : 14}" text-anchor="middle" fill="#d8cfbf" style="font-size:9.5px">${esc(clip(standing(e) ? t(S.meta.standings[standing(e)]) : egoId === theHead() ? t("Head of the family") : life(e), 18))}</text>${egoId === theHead() ? `<circle r="51" fill="none" stroke="var(--seal)" stroke-width="3"/>` : ""}</g></svg>`;
   box.innerHTML = s;
-  zoomable(box, "web" + egoId + reach, {x: -half + PAD - 150, y: -half + PAD - 150, w: 2 * (half - PAD + 150), h: 2 * (half - PAD + 150)}, recenter, {x: 0, y: 0});
+  zoomable(box, (byDegree ? "rings" : "web") + egoId + reach, {x: -half + PAD - 150, y: -half + PAD - 150, w: 2 * (half - PAD + 150), h: 2 * (half - PAD + 150)}, recenter, {x: 0, y: 0});
   recenter = false;
   const svg = box.querySelector("svg");
   box.querySelectorAll(".wnode").forEach(n => {
@@ -745,7 +777,7 @@ function panel() {
       <div class="chips">${roleChips(r.me.tags)}</div>
       <div class="row"><button class="btn sm pri" onclick="standAs(${sel})">${t("Stand here")}</button>
         <button class="btn sm" onclick="personDialog(${sel})">${t("Edit")}</button>
-        <button class="btn sm" onclick="betweenIds=[${egoId},${sel}];showTab('between');render()">${t("Between")}</button>
+        <button class="btn sm" onclick="betweenIds=[${egoId},${sel}];betweenAuto=null;betweenCell=null;showTab('between');render()">${t("Between")}</button>
         <button class="btn sm" onclick="historyDialog(${egoId},${sel})">${t("History")}</button>
         ${ego.sex === "m" && !dead(ego) && !dead(p) ? (p.carried_by === egoId
           ? `<button class="btn sm" onclick="setStanding(${sel},{carried_by:null,carried_note:''})">${t("{a} no longer carries {b}", {a: esc(ego.name), b: esc(p.name)})}</button>`
@@ -951,9 +983,16 @@ function foldMap() {                 // fold every house below the root's childr
 }
 
 /* ---------- between ---------- */
+/* the living nearest to whoever you stand as: husband or wife, parents, children, brothers and sisters */
+function nearestKin() {
+  const rank = {S: 0, P: 1, C: 2, PC: 3};
+  return Object.keys(E.rels).map(Number).filter(id => E.rels[id].them.path in rank && !dead(P(id)))
+    .sort((a, b) => rank[E.rels[a].them.path] - rank[E.rels[b].them.path] || (IX().est[a] ?? 9999) - (IX().est[b] ?? 9999)).slice(0, 11);
+}
 async function drawBetween() {
   const el = $("#between");
-  const chips = betweenIds.map(id => `<span class="chip" onclick="betweenIds=betweenIds.filter(x=>x!==${id});drawBetween()">${esc(nm(id))} ✕</span>`).join("");
+  if (E && ((!betweenIds.length && !betweenCleared) || (betweenAuto != null && betweenAuto !== egoId))) { betweenIds = [egoId, ...nearestKin()]; betweenAuto = egoId; betweenCell = null; }
+  const chips = betweenIds.map(id => `<span class="chip" onclick="betweenIds=betweenIds.filter(x=>x!==${id});betweenAuto=null;betweenCleared=true;drawBetween()">${esc(nm(id))} ✕</span>`).join("");
   let table = `<p class="mute">${t("Choose two or more people to see what each is to each, and what each owes.")}</p>`, detail = "";
   if (betweenIds.length > 1) {
     const B = (await api("GET", "/api/between?ids=" + betweenIds.join(","))).matrix;
@@ -975,12 +1014,13 @@ async function drawBetween() {
   el.innerHTML = `<div class="card"><div class="row"><div class="find"><input type="search" id="bq" placeholder="${t("add a person…")}" autocomplete="off"><div class="drop" id="bdrop" hidden></div></div>
       <select id="bhouse"><option value="">${t("add a household…")}</option>${S.households.map(h => `<option value="${h.id}">${esc(h.name)}</option>`).join("")}</select>
       ${E ? `<button class="btn sm" onclick="addBetween([egoId,...shown().filter(i=>!dead(P(i)))])">${t("add {name}’s living close kin", {name: esc(nm(egoId))})}</button>` : ""}
-      <button class="btn sm" onclick="betweenIds=[];betweenCell=null;drawBetween()">${t("clear")}</button></div>
+      ${E ? `<button class="btn sm" onclick="betweenIds=[];betweenCleared=false;betweenAuto=null;drawBetween()">${t("{name} and nearest kin", {name: esc(nm(egoId))})}</button>` : ""}
+      <button class="btn sm" onclick="betweenIds=[];betweenCell=null;betweenAuto=null;betweenCleared=true;drawBetween()">${t("clear")}</button></div>
     <div class="chips" style="margin-top:8px">${chips}</div></div><div style="overflow:auto">${table}</div><div style="margin-top:14px">${detail}</div>`;
   attachFinder($("#bq"), $("#bdrop"), id => addBetween([id]));
   $("#bhouse").onchange = e => addBetween(Object.values(S.people).filter(p => p.household_id === +e.target.value).map(p => p.id));
 }
-function addBetween(ids) { for (const i of ids) if (!betweenIds.includes(i) && betweenIds.length < 14) betweenIds.push(i); drawBetween(); }
+function addBetween(ids) { betweenAuto = null; for (const i of ids) if (!betweenIds.includes(i) && betweenIds.length < 14) betweenIds.push(i); drawBetween(); }
 
 /* ---------- the way ---------- */
 function wayDuties() {
@@ -1352,9 +1392,9 @@ async function fromHash() {         // deep links: #ego=12&sel=30&view=fan · #t
   if (ego !== egoId || !E) { egoId = ego; await loadEgo(); recenter = true; }
   const tab = ["map", "atlas", "between", "way", "rulings", "clan", "about"].includes(hash.get("tab")) ? hash.get("tab") : "stand";
   sel = tab === "stand" && E && E.rels[+hash.get("sel")] ? +hash.get("sel") : null;
-  if (["web", "tree", "fan", "duties"].includes(hash.get("view"))) view = hash.get("view");
+  if (VIEWS.includes(hash.get("view"))) view = hash.get("view");
   reach = hash.get("reach") === "wide" ? "wide" : "close"; $("#reachBtn").textContent = reach === "close" ? t("Wider") : t("Closer");
-  if (["network", "authority", "lifelines"].includes(hash.get("av"))) atlasView = hash.get("av");
+  if (["network", "houses", "lines", "authority", "lifelines"].includes(hash.get("av"))) atlasView = hash.get("av");
   atlasSel = tab === "atlas" && P(+hash.get("sel")) ? +hash.get("sel") : null;
   if (hash.get("q")) { libQ = hash.get("q"); libHits = (await api("GET", "/api/library?q=" + encodeURIComponent(libQ))).results; }
   showTab(tab); render();
